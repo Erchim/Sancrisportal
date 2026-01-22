@@ -10,7 +10,11 @@
       ],
       "link": "",
       "featured": true,
-      "priority": 6
+      "priority": 6,
+      "cover": "assets/images/cover-music.svg",
+      "description": "",
+      "address": "",
+      "map_url": ""
     },
     {
       "id": "latin-night",
@@ -22,7 +26,11 @@
       ],
       "link": "",
       "featured": false,
-      "priority": 0
+      "priority": 0,
+      "cover": "assets/images/cover-music.svg",
+      "description": "",
+      "address": "",
+      "map_url": ""
     }
   ]
 }

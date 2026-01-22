@@ -18,7 +18,8 @@
       "contact": "+52 000 000 0000",
       "source_url": "https://instagram.com/events.sancristobal",
       "featured": true,
-      "priority": 10
+      "priority": 10,
+      "cover": "assets/images/cover-events.svg"
     },
     {
       "id": "2026-01-26-yoga-sunrise",
@@ -38,7 +39,8 @@
       "contact": "WhatsApp: +52 000 000 0000",
       "source_url": "",
       "featured": false,
-      "priority": 0
+      "priority": 0,
+      "cover": "assets/images/cover-events.svg"
     }
   ]
 }

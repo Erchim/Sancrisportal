@@ -1,19 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <title>Life — {{SITE_TITLE}}</title>
+  <title>Life in San Cristóbal — {SITE_TITLE}</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="assets/style.css" />
-<meta name="theme-color" content="#0b0c10" />
-  <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
-  <meta name="robots" content="index,follow" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Events.SanCristobal — City Portal" />
-  <meta property="og:description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
-
+  <meta name="theme-color" content="#0b0c10" />
 </head>
 <body>
 <header class="container header">
@@ -40,12 +34,14 @@
 <main class="container">
   <section class="card">
     <div class="card-head">
-      <h1>Life in San Cristóbal</h1>
-      <p class="muted">Write content in <span class="kbd">/posts</span> (Markdown).</p>
-      <div class="filters"><input id="articlesSearch" class="input" placeholder="Search life articles..." /><button class="btn" id="articlesSearchBtn" type="button">Search</button></div>
+      <h1>🏙️ Life in San Cristóbal</h1>
+      <p class="muted">Living, money, safety, day‑to‑day.</p>
+      <div class="filters">
+        <input id="articlesSearch" class="input" placeholder="Search..." />
+      </div>
     </div>
     <div id="articlesList" class="list"></div>
-    <div class="card-foot muted small">List: <span class="kbd">data/articles.json</span>. Content: <span class="kbd">posts/*.md</span>.</div>
+    <div class="card-foot muted small">List: <span class="kbd">data/articles.json</span>. Content: <span class="kbd">posts/*.md</span>. Add covers in <span class="kbd">assets/images</span>.</div>
   </section>
 </main>
 
@@ -53,7 +49,6 @@
   <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
 <script src="assets/app.js"></script>
-
 <script>
   App.initListPage({
     dataset: "data/articles.json",
@@ -61,23 +56,26 @@
     listId: "articlesList",
     renderItem: (a) => {
       const el = document.createElement("div");
-      el.className = "item";
+      el.className = "item with-cover";
+      const cover = a.cover || "assets/images/cover-post.svg";
+      const url = "post.html?slug=" + encodeURIComponent(a.slug);
+      const meta = [a.date || "", a.category || ""].filter(Boolean).join(" • ");
       el.innerHTML = `
+        <div class="cover"><img src="${cover}" alt="" /></div>
         <div>
-          <h3 style="margin:0 0 4px 0;"><a href="post.html?slug=${encodeURIComponent(a.slug)}">${a.title}</a></h3>
-          <div class="meta"><span>🗓️ ${a.date || ""}</span><span>🏷️ ${a.category || "Life"}</span></div>
+          <h3 style="margin:0 0 6px 0;"><a href="${url}">${a.title}</a></h3>
+          <div class="meta"><span>${meta}</span></div>
           <div class="badges">
             ${(a.tags||[]).slice(0,4).map(t=>`<span class="badge">${t}</span>`).join("")}
             ${a.featured ? `<span class="badge accent">Featured</span>` : ""}
           </div>
           <div class="muted small" style="margin-top:8px;">${a.excerpt || ""}</div>
         </div>
-        <div style="display:grid; place-items:center;"><a class="btn" href="post.html?slug=${encodeURIComponent(a.slug)}">Read</a></div>
+        <div style="display:grid; place-items:center;"><a class="btn" href="${url}">Read</a></div>
       `;
       return el;
     }
   });
 </script>
-
 </body>
 </html>

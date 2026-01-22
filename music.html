@@ -1,19 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <title>Music — {{SITE_TITLE}}</title>
+  <title>Music & Parties — {SITE_TITLE}</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="assets/style.css" />
-<meta name="theme-color" content="#0b0c10" />
-  <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
-  <meta name="robots" content="index,follow" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Events.SanCristobal — City Portal" />
-  <meta property="og:description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
-
+  <meta name="theme-color" content="#0b0c10" />
 </head>
 <body>
 <header class="container header">
@@ -41,9 +35,12 @@
   <section class="card">
     <div class="card-head">
       <h1>Music & Parties</h1>
-      <div class="filters"><input id="musicSearch" class="input" placeholder="Search..." /> <button class="btn" id="musicSearchBtn" type="button">Search</button></div>
+      <div class="filters">
+        <input id="musicSearch" class="input" placeholder="Search..." />
+      </div>
     </div>
     <div id="musicList" class="list"></div>
+    <div class="card-foot muted small">Edit list in <span class="kbd">data/music.json</span>. Add cover images in <span class="kbd">assets/images</span>.</div>
   </section>
 </main>
 
@@ -51,7 +48,6 @@
   <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
 <script src="assets/app.js"></script>
-
 <script>
   App.initListPage({
     dataset: "data/music.json",
@@ -59,26 +55,27 @@
     listId: "musicList",
     renderItem: (x) => {
       const el = document.createElement("div");
-      el.className = "item";
-      el.id = x.id || "";
+      el.className = "item with-cover";
+      const title = x.name || x.place || "";
+      const meta = [x.genre].filter(Boolean).join(" • ");
       el.innerHTML = `
+        <div class="cover"><img src="${x.cover || 'assets/images/cover-post.svg'}" alt="" /></div>
         <div>
-          <h3>${x.place}</h3>
-          <div class="meta"><span>${x.genre || ""}</span></div>
+          <h3 style="margin:0 0 6px 0;">${title}</h3>
+          <div class="meta"><span>${meta}</span></div>
           <div class="badges">
             ${(x.tags||[]).slice(0,4).map(t=>`<span class="badge">${t}</span>`).join("")}
             ${x.featured ? `<span class="badge accent">Featured</span>` : ""}
-            ${x.link ? `<span class="badge purple">Link</span>` : ""}
           </div>
+          ${x.description ? `<div class="muted small" style="margin-top:8px;">${x.description}</div>` : ""}
         </div>
         <div style="display:grid;place-items:center;">
-          ${x.link ? `<a class="btn" target="_blank" rel="noreferrer" href="${x.link}">Open</a>` : `<span class="muted small">—</span>`}
+          <a class="btn" href="item.html?type=music&id=${encodeURIComponent(x.id)}">View</a>
         </div>
       `;
       return el;
     }
   });
 </script>
-
 </body>
 </html>

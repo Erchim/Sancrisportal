@@ -12,7 +12,9 @@
       ],
       "excerpt": "Caves + riverside park for an easy half‑day trip.",
       "featured": true,
-      "priority": 8
+      "priority": 8,
+      "cover": "assets/images/cover-nature.svg",
+      "description": "Caves + riverside park for an easy half‑day trip."
     },
     {
       "slug": "cenote-chukumaltik",
@@ -26,7 +28,9 @@
       ],
       "excerpt": "Crystal water cenote — perfect for a day trip.",
       "featured": false,
-      "priority": 0
+      "priority": 0,
+      "cover": "assets/images/cover-nature.svg",
+      "description": "Crystal water cenote — perfect for a day trip."
     }
   ]
 }

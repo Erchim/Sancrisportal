@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Details — {{SITE_TITLE}}</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+</head>
+<body>
+<header class="container header">
+  <div class="brand">
+    <div class="logo">SC</div>
+    <div>
+      <div class="brand-title" data-site-title>Events.SanCris</div>
+      <div class="brand-sub" data-site-sub>Local guides • Events • Tips</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="articles.html">Life</a>
+    <a href="nature.html">Nature</a>
+    <a href="events.html">Events</a>
+    <a href="hotels.html">Hotels</a>
+    <a href="restaurants.html">Food</a>
+    <a href="music.html">Music</a>
+    <a href="faq.html">FAQ</a>
+    <a href="submit.html">Submit</a>
+  </nav>
+</header>
+
+<main class="container">
+  <section class="hero-card">
+    <div class="hero-media"><img id="heroImg" alt="" /></div>
+    <div class="hero-body">
+      <h1 id="title">Loading…</h1>
+      <p class="lead" id="desc"></p>
+      <div class="meta" id="meta"></div>
+      <div class="filters" id="actions" style="margin-top:14px;"></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:16px;">
+    <div class="card-head">
+      <h2>Details</h2>
+      <p class="muted">Address, map, tags, contact, etc.</p>
+    </div>
+    <div id="details" class="list"></div>
+    <div class="card-foot"><a href="javascript:history.back()">← Back</a></div>
+  </section>
+</main>
+
+<footer class="container footer">
+  <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
+</footer>
+<script src="assets/app.js"></script>
+<script>
+  (async () => {
+    await App.initSite();
+    const params = new URLSearchParams(location.search);
+    const type = params.get("type");
+    const id = params.get("id");
+    const map = {
+      hotels: {file:"data/hotels.json", key:"hotels"},
+      restaurants: {file:"data/restaurants.json", key:"restaurants"},
+      music: {file:"data/music.json", key:"music"},
+    };
+    if (!map[type]) {
+      document.getElementById("title").textContent = "Not found";
+      document.getElementById("desc").textContent = "Wrong type.";
+      return;
+    }
+    const data = await (await fetch(map[type].file, {cache:"no-store"})).json();
+    const items = data[map[type].key] || [];
+    const item = items.find(x => String(x.id) === String(id));
+    if (!item) {
+      document.getElementById("title").textContent = "Not found";
+      document.getElementById("desc").textContent = "Wrong id.";
+      return;
+    }
+    document.title = `${item.name || item.place || "Details"} — ${document.title}`;
+
+    const hero = document.getElementById("heroImg");
+    hero.src = item.cover || "assets/images/cover-post.svg";
+    hero.alt = item.name || item.place || "";
+
+    document.getElementById("title").textContent = item.name || item.place || "";
+    document.getElementById("desc").textContent = item.description || "";
+
+    const meta = document.getElementById("meta");
+    const badges = [];
+    if (item.type) badges.push(`🏷️ ${item.type}`);
+    if (item.genre) badges.push(`🎵 ${item.genre}`);
+    if (item.price) badges.push(`💰 ${item.price}`);
+    if (item.area) badges.push(`📍 ${item.area}`);
+    meta.innerHTML = badges.map(x => `<span class="badge accent">${x}</span>`).join(" ");
+
+    const actions = document.getElementById("actions");
+    if (item.link) actions.innerHTML += `<a class="btn" target="_blank" rel="noreferrer" href="${item.link}">Open link</a>`;
+    if (item.map_url) actions.innerHTML += `<a class="btn ghost" target="_blank" rel="noreferrer" href="${item.map_url}">Open map</a>`;
+
+    const details = document.getElementById("details");
+    const lines = [];
+    if (item.address) lines.push({k:"Address", v:item.address});
+    if (item.tags && item.tags.length) lines.push({k:"Tags", v:item.tags.join(", ")});
+    if (item.contact) lines.push({k:"Contact", v:item.contact});
+    if (!lines.length) lines.push({k:"", v:"No extra details yet. Add fields in the JSON file."});
+    details.innerHTML = lines.map(l => `
+      <div class="item">
+        <div>
+          ${l.k ? `<div class="muted small">${l.k}</div>` : ""}
+          <div>${l.v}</div>
+        </div>
+      </div>
+    `).join("");
+  })();
+</script>
+</body>
+</html>

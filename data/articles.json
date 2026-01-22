@@ -11,7 +11,9 @@
       ],
       "excerpt": "How to browse events, read guides, and submit your own information.",
       "featured": true,
-      "priority": 9
+      "priority": 9,
+      "cover": "assets/images/cover-life.svg",
+      "description": "How to browse events, read guides, and submit your own information."
     },
     {
       "slug": "cost-of-living",
@@ -25,7 +27,9 @@
       ],
       "excerpt": "Quick reference costs for rent, food, transport and daily life.",
       "featured": false,
-      "priority": 0
+      "priority": 0,
+      "cover": "assets/images/cover-life.svg",
+      "description": "Quick reference costs for rent, food, transport and daily life."
     }
   ]
 }

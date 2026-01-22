@@ -291,7 +291,7 @@
 
     function render(it) {
       const wrap = document.createElement("div");
-      wrap.className = "item";
+      wrap.className = "item with-cover";
       wrap.id = it.id || "";
       wrap.innerHTML = `
         <div>
@@ -369,6 +369,9 @@
   function eventCard(e) {
     const wrap = document.createElement("div");
     wrap.className = "item";
+    const cover = document.createElement("div");
+    cover.className = "cover";
+    cover.innerHTML = `<img src="${escapeHtml(e.cover || "assets/images/cover-events.svg")}" alt="" />`;
     const left = document.createElement("div");
     const right = document.createElement("div");
     right.style.display = "grid";
@@ -390,6 +393,7 @@
       ${e.description ? `<div class="muted small" style="margin-top:8px;">${escapeHtml(e.description.length > 160 ? e.description.slice(0, 160) + "…" : e.description)}</div>` : ""}
     `;
     right.innerHTML = `<a class="btn" href="event.html?id=${encodeURIComponent(e.id)}">Details</a>`;
+    wrap.appendChild(cover);
     wrap.appendChild(left);
     wrap.appendChild(right);
     return wrap;
