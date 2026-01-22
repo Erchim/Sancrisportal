@@ -1,12 +1,24 @@
-# San Cristóbal Guide — Package A
-Static portal for GitHub Pages.
+# Events.SanCristobal — Portal (Package A v2)
+Static website for GitHub Pages (no backend).
 
-## Edit content
-- Events: data/events.json
-- Life: data/articles.json + posts/*.md
-- Nature: data/places.json + posts/*.md
-- FAQ: data/faq.json
-- Hotels / Restaurants / Music: data/*.json
+## 1) Edit links / branding
+Open: `data/site.json`
+- instagram_url
+- telegram_url
+- submit_form_url
+- description
 
-## Featured / Sponsored
-Use `featured: true` and optional `priority` in JSON.
+## 2) Add content
+- Articles list: `data/articles.json` + write Markdown in `posts/<slug>.md`
+- Places list: `data/places.json` + write Markdown in `posts/<slug>.md`
+- FAQ: `data/faq.json`
+- Events: `data/events.json`
+- Hotels/Food/Music: `data/*.json`
+
+## 3) Publish with GitHub Pages
+Settings → Pages → Deploy from branch → `main` / root.
+URL appears there.
+
+## Notes
+- Home page has global search across everything.
+- Featured items use `featured: true` + optional `priority`.

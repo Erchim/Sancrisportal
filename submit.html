@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Submit — {{SITE_TITLE}}</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+  <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
+  <meta name="robots" content="index,follow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Events.SanCristobal — City Portal" />
+  <meta property="og:description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
+
+</head>
+<body>
+<header class="container header">
+  <div class="brand">
+    <div class="logo">SC</div>
+    <div>
+      <div class="brand-title" data-site-title>Events.SanCris</div>
+      <div class="brand-sub" data-site-sub>Local guides • Events • Tips</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="articles.html">Life</a>
+    <a href="nature.html">Nature</a>
+    <a href="events.html">Events</a>
+    <a href="hotels.html">Hotels</a>
+    <a href="restaurants.html">Food</a>
+    <a href="music.html">Music</a>
+    <a href="faq.html">FAQ</a>
+    <a href="submit.html">Submit</a>
+  </nav>
+</header>
+
+<main class="container">
+  <section class="card">
+    <div class="card-head">
+      <h1>Submit an event / tip</h1>
+      <p class="muted">Fast workflow: you collect, the site publishes. (For now: manual copy into JSON.)</p>
+    </div>
+    <div style="padding:16px;">
+      <ol class="muted" style="line-height:1.7; margin-top:0;">
+        <li>Open the submission form: <span class="kbd">data/site.json → submit_form_url</span></li>
+        <li>When you receive a submission, add it to <span class="kbd">data/events.json</span></li>
+        <li>Commit to GitHub — site updates automatically</li>
+      </ol>
+      <div class="filters">
+        <a class="btn" id="openFormBtn" href="#" target="_blank" rel="noreferrer">Open submission form</a>
+        <a class="btn ghost" id="openIGBtn" href="#" target="_blank" rel="noreferrer">Open Instagram</a>
+      </div>
+    </div>
+    <div class="card-foot muted small">Next step (automation): Google Form → Google Sheets → JSON build (no backend). We can add that after.</div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Event format (copy/paste template)</h2>
+      <p class="muted">Add events under <span class="kbd">"events"</span> array in <span class="kbd">data/events.json</span>.</p>
+    </div>
+    <div style="padding:16px;">
+<pre class="muted" style="white-space:pre-wrap; margin:0; line-height:1.55; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); padding:14px; border-radius:16px;">
+{
+  "id": "2026-02-01-example",
+  "title": "Example Event",
+  "date": "2026-02-01",
+  "time": "19:00",
+  "category": "Party",
+  "venue": "Venue name",
+  "address": "Street + area",
+  "price": 0,
+  "tags": ["dance","friends"],
+  "description": "Short description (1–2 lines)",
+  "contact": "WhatsApp +52 ...",
+  "source_url": "https://instagram.com/...",
+  "featured": false,
+  "priority": 0
+}
+</pre>
+    </div>
+  </section>
+</main>
+
+<footer class="container footer">
+  <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
+</footer>
+<script src="assets/app.js"></script>
+
+<script>
+  (async () => {
+    await App.initSite();
+    const site = await (await fetch("data/site.json", {cache:"no-store"})).json().catch(()=>({}));
+    const f = document.getElementById("openFormBtn");
+    const ig = document.getElementById("openIGBtn");
+    if (f && site.submit_form_url) f.href = site.submit_form_url;
+    if (ig && site.instagram_url) ig.href = site.instagram_url;
+  })();
+</script>
+
+</body>
+</html>

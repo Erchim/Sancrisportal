@@ -1,14 +1,17 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <title>Life in San Cristóbal — Guides</title>
+  <title>Life — {{SITE_TITLE}}</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+  <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
+  <meta name="robots" content="index,follow" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="San Cristóbal Guide" />
-  <meta property="og:title" content="San Cristóbal Guide" />
-  <meta property="og:description" content="Local guide to San Cristóbal de las Casas: life, nature, events, food, hotels and travel tips." />
+  <meta property="og:title" content="Events.SanCristobal — City Portal" />
+  <meta property="og:description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
 
 </head>
 <body>
@@ -16,8 +19,8 @@
   <div class="brand">
     <div class="logo">SC</div>
     <div>
-      <div class="brand-title">San Cristóbal Guide</div>
-      <div class="brand-sub">Life • Nature • Events • Food</div>
+      <div class="brand-title" data-site-title>Events.SanCris</div>
+      <div class="brand-sub" data-site-sub>Local guides • Events • Tips</div>
     </div>
   </div>
   <nav class="nav">
@@ -29,6 +32,7 @@
     <a href="restaurants.html">Food</a>
     <a href="music.html">Music</a>
     <a href="faq.html">FAQ</a>
+    <a href="submit.html">Submit</a>
   </nav>
 </header>
 
@@ -36,14 +40,17 @@
   <section class="card">
     <div class="card-head">
       <h1>Life in San Cristóbal</h1>
-      <p class="muted">Content in <code>/posts</code> (Markdown).</p>
+      <p class="muted">Write content in <span class="kbd">/posts</span> (Markdown).</p>
       <div class="filters"><input id="articlesSearch" class="input" placeholder="Search life articles..." /></div>
     </div>
     <div id="articlesList" class="list"></div>
-    <div class="card-foot muted small">List: <code>data/articles.json</code>. Content: <code>posts/*.md</code>.</div>
+    <div class="card-foot muted small">List: <span class="kbd">data/articles.json</span>. Content: <span class="kbd">posts/*.md</span>.</div>
   </section>
 </main>
-<footer class="container footer"><div class="muted small">© <span id="year"></span> San Cristóbal Guide</div></footer>
+
+<footer class="container footer">
+  <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
+</footer>
 <script src="assets/app.js"></script>
 
 <script>

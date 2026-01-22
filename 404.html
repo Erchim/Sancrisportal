@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <title>Nature — {{SITE_TITLE}}</title>
+  <title>Not Found — {{SITE_TITLE}}</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
@@ -39,12 +39,13 @@
 <main class="container">
   <section class="card">
     <div class="card-head">
-      <h1>Nature & Places</h1>
-      <p class="muted">Day trips and nearby spots.</p>
-      <div class="filters"><input id="placesSearch" class="input" placeholder="Search places (caves, swim, river…)" /></div>
+      <h1>404 — Page not found</h1>
+      <p class="muted">This page doesn’t exist. Use search on the home page.</p>
     </div>
-    <div id="placesList" class="list"></div>
-    <div class="card-foot muted small">List: <span class="kbd">data/places.json</span>. Content: <span class="kbd">posts/*.md</span>.</div>
+    <div style="padding:16px;" class="filters">
+      <a class="btn" href="index.html">Go Home</a>
+      <a class="btn ghost" href="events.html">Open Events</a>
+    </div>
   </section>
 </main>
 
@@ -52,31 +53,6 @@
   <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
 <script src="assets/app.js"></script>
-
-<script>
-  App.initListPage({
-    dataset: "data/places.json",
-    searchInputId: "placesSearch",
-    listId: "placesList",
-    renderItem: (p) => {
-      const el = document.createElement("div");
-      el.className = "item";
-      el.innerHTML = `
-        <div>
-          <h3 style="margin:0 0 4px 0;"><a href="post.html?slug=${encodeURIComponent(p.slug)}">${p.title}</a></h3>
-          <div class="meta"><span>🚗 ${p.distance || ""}</span><span>🏷️ ${p.category || "Nature"}</span></div>
-          <div class="badges">
-            ${(p.tags||[]).slice(0,4).map(t=>`<span class="badge">${t}</span>`).join("")}
-            ${p.featured ? `<span class="badge accent">Featured</span>` : ""}
-          </div>
-          <div class="muted small" style="margin-top:8px;">${p.excerpt || ""}</div>
-        </div>
-        <div style="display:grid; place-items:center;"><a class="btn" href="post.html?slug=${encodeURIComponent(p.slug)}">Details</a></div>
-      `;
-      return el;
-    }
-  });
-</script>
 
 </body>
 </html>

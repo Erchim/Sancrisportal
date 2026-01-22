@@ -1,14 +1,17 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <title>San Cristóbal de las Casas — Local Guide</title>
+  <title>{{SITE_TITLE}} — City Portal</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+  <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
+  <meta name="robots" content="index,follow" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="San Cristóbal Guide" />
-  <meta property="og:title" content="San Cristóbal Guide" />
-  <meta property="og:description" content="Local guide to San Cristóbal de las Casas: life, nature, events, food, hotels and travel tips." />
+  <meta property="og:title" content="Events.SanCristobal — City Portal" />
+  <meta property="og:description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
 
 </head>
 <body>
@@ -16,8 +19,8 @@
   <div class="brand">
     <div class="logo">SC</div>
     <div>
-      <div class="brand-title">San Cristóbal Guide</div>
-      <div class="brand-sub">Life • Nature • Events • Food</div>
+      <div class="brand-title" data-site-title>Events.SanCris</div>
+      <div class="brand-sub" data-site-sub>Local guides • Events • Tips</div>
     </div>
   </div>
   <nav class="nav">
@@ -29,6 +32,7 @@
     <a href="restaurants.html">Food</a>
     <a href="music.html">Music</a>
     <a href="faq.html">FAQ</a>
+    <a href="submit.html">Submit</a>
   </nav>
 </header>
 
@@ -43,7 +47,12 @@
         <a class="btn ghost" href="faq.html">Open FAQ</a>
       </div>
     </div>
+    <div class="filters">
+      <a class="btn ghost" id="igBtn" href="#" target="_blank" rel="noreferrer">Open Instagram</a>
+      <a class="btn ghost" href="submit.html">Submit an Event</a>
+    </div>
   </section>
+
   <section class="grid">
     <a class="tile" href="articles.html"><div class="k">🏙 Life</div><div class="d">Living, money, safety, day-to-day</div></a>
     <a class="tile" href="nature.html"><div class="k">🌿 Nature</div><div class="d">Day trips & places nearby</div></a>
@@ -52,26 +61,43 @@
     <a class="tile" href="restaurants.html"><div class="k">🍴 Food</div><div class="d">Restaurants, cafes, vegan</div></a>
     <a class="tile" href="music.html"><div class="k">🎶 Music</div><div class="d">Bars, parties, live sets</div></a>
   </section>
+
   <section class="card">
-    <div class="card-head"><h2>Search results</h2><p class="muted">Type keywords (e.g. “yoga”, “arcotete”, “airport”, “vegan”).</p></div>
+    <div class="card-head">
+      <h2>Search results</h2>
+      <p class="muted">Type a few keywords (e.g. “yoga”, “arcotete”, “airport”, “vegan”).</p>
+    </div>
     <div id="globalResults" class="search-results"></div>
   </section>
+
   <section class="card">
-    <div class="card-head"><h2>Featured</h2><p class="muted">Highlighted posts, places, and events.</p></div>
+    <div class="card-head">
+      <h2>Featured</h2>
+      <p class="muted">Highlighted posts, places, and events.</p>
+    </div>
     <div id="featuredList" class="search-results"></div>
   </section>
-  <section id="submit" class="card">
-    <div class="card-head"><h2>Submit an event / tip</h2><p class="muted">Connect to your Google Form / Tally.</p></div>
-    <div class="filters" style="padding:16px;">
-      <a class="btn" href="#" id="submitLink">Open submission form</a>
-      <a class="btn ghost" href="#" id="communityLink">Join community group</a>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Quick actions</h2>
+      <p class="muted">For now, edit these links in <span class="kbd">data/site.json</span>.</p>
     </div>
-    <div class="card-foot muted small">Edit links at the bottom of <code>index.html</code>.</div>
+    <div class="filters" style="padding:16px;">
+      <a class="btn" href="submit.html" id="submitLink">Open submission</a>
+      <a class="btn ghost" href="#" id="communityLink" target="_blank" rel="noreferrer">Join community group</a>
+    </div>
   </section>
 </main>
-<footer class="container footer"><div class="muted small">© <span id="year"></span> San Cristóbal Guide</div></footer>
+
+<footer class="container footer">
+  <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
+</footer>
 <script src="assets/app.js"></script>
-<script>App.initHome({ submitUrl: "https://forms.gle/REPLACE_ME", communityUrl: "https://t.me/REPLACE_ME" });</script>
+
+<script>
+  App.initHome();
+</script>
 
 </body>
 </html>

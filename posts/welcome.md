@@ -6,4 +6,4 @@ This is a lightweight portal for **San Cristóbal de las Casas**.
 - Read **guides** (Markdown)
 - Explore **nature trips**
 
-Connect the submit button to your Google Form.
+Use the **Submit** page to send events/tips.
