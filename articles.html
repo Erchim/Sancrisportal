@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Life in San Cristóbal</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+<header class="container header">
+  <a href="index.html" class="logo">←</a>
+  <h1>Life in San Cristóbal</h1>
+</header>
+
+<main class="container">
+  <input id="articleSearch" class="input full" placeholder="Search articles..." />
+  <div id="articlesList" class="list"></div>
+</main>
+
+<script src="assets/app.js"></script>
+<script>
+App.loadArticles();
+</script>
+</body>
+</html>

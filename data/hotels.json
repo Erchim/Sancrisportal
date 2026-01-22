@@ -1,0 +1,9 @@
+{
+  "hotels": [
+    {
+      "name": "Hotel Bo",
+      "area": "Centro",
+      "price": "$$$"
+    }
+  ]
+}
