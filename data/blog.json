@@ -1,0 +1,11 @@
+{
+  "posts": [
+    {
+      "slug": "welcome",
+      "title": "Welcome: How this portal works",
+      "date": "2026-01-22",
+      "category": "Guide",
+      "excerpt": "A short explanation of how to browse events and submit your own."
+    }
+  ]
+}

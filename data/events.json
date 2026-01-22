@@ -1,0 +1,40 @@
+{
+  "events": [
+    {
+      "id": "2026-01-24-jazz-night",
+      "title": "Jazz Night (Live)",
+      "date": "2026-01-24",
+      "time": "20:00",
+      "category": "Live Music",
+      "venue": "Example Bar",
+      "address": "Centro, San Cristóbal de las Casas",
+      "price": 0,
+      "tags": [
+        "jazz",
+        "live",
+        "drinks"
+      ],
+      "description": "Live jazz set + open jam. Arrive early for good seats.",
+      "contact": "+52 000 000 0000",
+      "source_url": "https://instagram.com/events.sancristobal"
+    },
+    {
+      "id": "2026-01-26-yoga-sunrise",
+      "title": "Sunrise Yoga in the Park",
+      "date": "2026-01-26",
+      "time": "07:30",
+      "category": "Wellness",
+      "venue": "Arco del Carmen area",
+      "address": "Meet point shared after registration",
+      "price": 120,
+      "tags": [
+        "yoga",
+        "morning",
+        "wellness"
+      ],
+      "description": "Bring water and a mat. Beginner-friendly.",
+      "contact": "WhatsApp: +52 000 000 0000",
+      "source_url": ""
+    }
+  ]
+}
