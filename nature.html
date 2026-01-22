@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0b0c10" />
+    <link rel="stylesheet" href="assets/style.css" />
+<meta name="theme-color" content="#0b0c10" />
   <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
   <meta name="robots" content="index,follow" />
   <meta property="og:type" content="website" />
@@ -41,7 +42,7 @@
     <div class="card-head">
       <h1>Nature & Places</h1>
       <p class="muted">Day trips and nearby spots.</p>
-      <div class="filters"><input id="placesSearch" class="input" placeholder="Search places (caves, swim, river…)" /></div>
+      <div class="filters"><input id="placesSearch" class="input" placeholder="Search places (caves, swim, river…)" /><button class="btn" id="placesSearchBtn" type="button">Search</button></div>
     </div>
     <div id="placesList" class="list"></div>
     <div class="card-foot muted small">List: <span class="kbd">data/places.json</span>. Content: <span class="kbd">posts/*.md</span>.</div>

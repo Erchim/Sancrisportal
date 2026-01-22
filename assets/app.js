@@ -270,6 +270,14 @@
     }
 
     input.addEventListener("input", apply);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        apply();
+      }
+    });
+    const btn = document.querySelector(`[data-search-btn="${searchInputId}"]`) || $(`${searchInputId}Btn`);
+    if (btn) btn.addEventListener("click", apply);
     apply();
   };
 
@@ -310,6 +318,14 @@
     }
 
     input.addEventListener("input", apply);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        apply();
+      }
+    });
+    const btn = document.querySelector(`[data-search-btn="${searchInputId}"]`) || $(`${searchInputId}Btn`);
+    if (btn) btn.addEventListener("click", apply);
     apply();
   };
 
