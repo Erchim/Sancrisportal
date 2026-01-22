@@ -1,9 +1,31 @@
 {
   "articles": [
     {
-      "id": "cost",
-      "title": "Cost of Living",
-      "excerpt": "Real prices in San Crist\u00f3bal"
+      "slug": "welcome",
+      "title": "Welcome: How this portal works",
+      "date": "2026-01-22",
+      "category": "Life",
+      "tags": [
+        "guide",
+        "how-to"
+      ],
+      "excerpt": "How to browse events, read guides, and submit your own information.",
+      "featured": true,
+      "priority": 9
+    },
+    {
+      "slug": "cost-of-living",
+      "title": "Cost of living in San Cristóbal (real numbers)",
+      "date": "2026-01-22",
+      "category": "Life",
+      "tags": [
+        "money",
+        "rent",
+        "food"
+      ],
+      "excerpt": "Quick reference costs for rent, food, transport and daily life.",
+      "featured": false,
+      "priority": 0
     }
   ]
 }

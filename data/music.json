@@ -1,8 +1,28 @@
 {
   "music": [
     {
-      "place": "Revoluci\u00f3n del Palenque",
-      "genre": "Live music"
+      "id": "revo-palenque",
+      "place": "Revolución del Palenque",
+      "genre": "Live music",
+      "tags": [
+        "live",
+        "bar"
+      ],
+      "link": "",
+      "featured": true,
+      "priority": 6
+    },
+    {
+      "id": "latin-night",
+      "place": "Latin Night (various venues)",
+      "genre": "Reggaeton / Salsa",
+      "tags": [
+        "party",
+        "dance"
+      ],
+      "link": "",
+      "featured": false,
+      "priority": 0
     }
   ]
 }

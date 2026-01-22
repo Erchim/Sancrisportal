@@ -1,8 +1,28 @@
 {
   "faq": [
     {
-      "q": "Is San Crist\u00f3bal safe?",
-      "a": "Yes, generally safe if you stay in central areas."
+      "id": "safety",
+      "q": "Is San Cristóbal safe for travelers?",
+      "a": "Generally yes in central areas. Use normal city caution at night, keep valuables secure, and prefer trusted taxis.",
+      "tags": [
+        "safety",
+        "night",
+        "tips"
+      ],
+      "featured": true,
+      "priority": 7
+    },
+    {
+      "id": "airport",
+      "q": "How do I get from Tuxtla airport to San Cristóbal?",
+      "a": "Most people use shared shuttles (colectivo vans) or private transfers. Shuttles are cheaper; private is faster and direct.",
+      "tags": [
+        "transport",
+        "airport",
+        "tuxtla"
+      ],
+      "featured": false,
+      "priority": 0
     }
   ]
 }

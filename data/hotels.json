@@ -1,9 +1,32 @@
 {
   "hotels": [
     {
+      "id": "hotel-bo",
       "name": "Hotel Bo",
+      "type": "Boutique",
+      "price": "$$$",
       "area": "Centro",
-      "price": "$$$"
+      "tags": [
+        "design",
+        "quiet"
+      ],
+      "link": "",
+      "featured": true,
+      "priority": 6
+    },
+    {
+      "id": "posada-del-abuelito",
+      "name": "Posada del Abuelito",
+      "type": "Budget",
+      "price": "$",
+      "area": "Centro",
+      "tags": [
+        "cheap",
+        "simple"
+      ],
+      "link": "",
+      "featured": false,
+      "priority": 0
     }
   ]
 }

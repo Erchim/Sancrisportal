@@ -1,25 +1,75 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <title>Life in San Cristóbal — Guides</title>
   <meta charset="utf-8" />
-  <title>Life in San Cristóbal</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="assets/style.css" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="San Cristóbal Guide" />
+  <meta property="og:title" content="San Cristóbal Guide" />
+  <meta property="og:description" content="Local guide to San Cristóbal de las Casas: life, nature, events, food, hotels and travel tips." />
+
 </head>
 <body>
 <header class="container header">
-  <a href="index.html" class="logo">←</a>
-  <h1>Life in San Cristóbal</h1>
+  <div class="brand">
+    <div class="logo">SC</div>
+    <div>
+      <div class="brand-title">San Cristóbal Guide</div>
+      <div class="brand-sub">Life • Nature • Events • Food</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="articles.html">Life</a>
+    <a href="nature.html">Nature</a>
+    <a href="events.html">Events</a>
+    <a href="hotels.html">Hotels</a>
+    <a href="restaurants.html">Food</a>
+    <a href="music.html">Music</a>
+    <a href="faq.html">FAQ</a>
+  </nav>
 </header>
 
 <main class="container">
-  <input id="articleSearch" class="input full" placeholder="Search articles..." />
-  <div id="articlesList" class="list"></div>
+  <section class="card">
+    <div class="card-head">
+      <h1>Life in San Cristóbal</h1>
+      <p class="muted">Content in <code>/posts</code> (Markdown).</p>
+      <div class="filters"><input id="articlesSearch" class="input" placeholder="Search life articles..." /></div>
+    </div>
+    <div id="articlesList" class="list"></div>
+    <div class="card-foot muted small">List: <code>data/articles.json</code>. Content: <code>posts/*.md</code>.</div>
+  </section>
 </main>
-
+<footer class="container footer"><div class="muted small">© <span id="year"></span> San Cristóbal Guide</div></footer>
 <script src="assets/app.js"></script>
+
 <script>
-App.loadArticles();
+  App.initListPage({
+    dataset: "data/articles.json",
+    searchInputId: "articlesSearch",
+    listId: "articlesList",
+    renderItem: (a) => {
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div>
+          <h3 style="margin:0 0 4px 0;"><a href="post.html?slug=${encodeURIComponent(a.slug)}">${a.title}</a></h3>
+          <div class="meta"><span>🗓️ ${a.date || ""}</span><span>🏷️ ${a.category || "Life"}</span></div>
+          <div class="badges">
+            ${(a.tags||[]).slice(0,4).map(t=>`<span class="badge">${t}</span>`).join("")}
+            ${a.featured ? `<span class="badge accent">Featured</span>` : ""}
+          </div>
+          <div class="muted small" style="margin-top:8px;">${a.excerpt || ""}</div>
+        </div>
+        <div style="display:grid; place-items:center;"><a class="btn" href="post.html?slug=${encodeURIComponent(a.slug)}">Read</a></div>
+      `;
+      return el;
+    }
+  });
 </script>
+
 </body>
 </html>

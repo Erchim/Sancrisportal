@@ -1,8 +1,32 @@
 {
   "restaurants": [
     {
+      "id": "tierra-y-cielo",
       "name": "Tierra y Cielo",
-      "type": "Local cuisine"
+      "type": "Local cuisine",
+      "price": "$$$",
+      "area": "Centro",
+      "tags": [
+        "mexican",
+        "fine-dining"
+      ],
+      "link": "",
+      "featured": true,
+      "priority": 6
+    },
+    {
+      "id": "madre-tierra",
+      "name": "Madre Tierra",
+      "type": "Vegan / Healthy",
+      "price": "$$",
+      "area": "Centro",
+      "tags": [
+        "vegan",
+        "coffee"
+      ],
+      "link": "",
+      "featured": false,
+      "priority": 0
     }
   ]
 }

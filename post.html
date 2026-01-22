@@ -1,48 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <title>Post — San Cristóbal Guide</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Post — Events San Cristóbal</title>
-  <meta name="description" content="Guide post." />
   <link rel="stylesheet" href="assets/style.css" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="San Cristóbal Guide" />
+  <meta property="og:title" content="San Cristóbal Guide" />
+  <meta property="og:description" content="Local guide to San Cristóbal de las Casas: life, nature, events, food, hotels and travel tips." />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-  <header class="container header">
-    <div class="brand">
-      <div class="logo">ES</div>
-      <div>
-        <div class="brand-title">Events San Cristóbal</div>
-        <div class="brand-sub">Guide post</div>
-      </div>
+<header class="container header">
+  <div class="brand">
+    <div class="logo">SC</div>
+    <div>
+      <div class="brand-title">San Cristóbal Guide</div>
+      <div class="brand-sub">Life • Nature • Events • Food</div>
     </div>
-    <nav class="nav">
-      <a href="index.html">Home</a>
-      <a href="events.html">Events</a>
-      <a href="blog.html">Guides</a>
-      <a class="btn" href="https://instagram.com/events.sancristobal" target="_blank" rel="noreferrer">Instagram</a>
-    </nav>
-  </header>
+  </div>
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="articles.html">Life</a>
+    <a href="nature.html">Nature</a>
+    <a href="events.html">Events</a>
+    <a href="hotels.html">Hotels</a>
+    <a href="restaurants.html">Food</a>
+    <a href="music.html">Music</a>
+    <a href="faq.html">FAQ</a>
+  </nav>
+</header>
 
-  <main class="container">
-    <article class="card prose">
-      <div id="postBody"></div>
-      <div class="card-foot">
-        <a href="blog.html">← Back to guides</a>
-      </div>
-    </article>
-  </main>
+<main class="container">
+  <article class="card prose">
+    <div id="postBody"></div>
+    <div class="card-foot"><a href="index.html">← Back home</a></div>
+  </article>
+</main>
+<footer class="container footer"><div class="muted small">© <span id="year"></span> San Cristóbal Guide</div></footer>
+<script src="assets/app.js"></script>
+<script>App.initPost();</script>
 
-  <footer class="container footer">
-    <div class="muted small">© <span id="year"></span> Events San Cristóbal</div>
-  </footer>
-
-  <script src="assets/app.js"></script>
-  <script>
-    window.App.initPost({
-      defaultPost: "welcome"
-    });
-  </script>
 </body>
 </html>

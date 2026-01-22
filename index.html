@@ -1,11 +1,15 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
   <title>San Cristóbal de las Casas — Local Guide</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Local guide to San Cristóbal de las Casas: life, nature, events, food, hotels and travel tips." />
   <link rel="stylesheet" href="assets/style.css" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="San Cristóbal Guide" />
+  <meta property="og:title" content="San Cristóbal Guide" />
+  <meta property="og:description" content="Local guide to San Cristóbal de las Casas: life, nature, events, food, hotels and travel tips." />
+
 </head>
 <body>
 <header class="container header">
@@ -17,7 +21,7 @@
     </div>
   </div>
   <nav class="nav">
-    <a href="index.html" class="active">Home</a>
+    <a href="index.html">Home</a>
     <a href="articles.html">Life</a>
     <a href="nature.html">Nature</a>
     <a href="events.html">Events</a>
@@ -31,25 +35,43 @@
 <main class="container">
   <section class="hero">
     <h1>San Cristóbal de las Casas</h1>
-    <p class="muted">Independent local guide for travelers & expats</p>
-    <input id="globalSearch" class="input full" placeholder="Search articles, places, tips..." />
+    <p class="muted">A fast portal: guides, nature trips, events, and practical tips.</p>
+    <div class="row">
+      <input id="globalSearch" class="input" placeholder="Search everything (events, FAQ, places, hotels…)" />
+      <div class="filters" style="margin-top:0;">
+        <a class="btn" href="events.html">Open Events</a>
+        <a class="btn ghost" href="faq.html">Open FAQ</a>
+      </div>
+    </div>
   </section>
-
   <section class="grid">
-    <a class="card link" href="articles.html">🏙 Life in San Cris</a>
-    <a class="card link" href="nature.html">🌿 Nature & Places</a>
-    <a class="card link" href="events.html">🎉 Events</a>
-    <a class="card link" href="hotels.html">🏨 Hotels</a>
-    <a class="card link" href="restaurants.html">🍴 Restaurants</a>
-    <a class="card link" href="music.html">🎶 Music & Parties</a>
-    <a class="card link" href="faq.html">❓ FAQ</a>
+    <a class="tile" href="articles.html"><div class="k">🏙 Life</div><div class="d">Living, money, safety, day-to-day</div></a>
+    <a class="tile" href="nature.html"><div class="k">🌿 Nature</div><div class="d">Day trips & places nearby</div></a>
+    <a class="tile" href="events.html"><div class="k">🎉 Events</div><div class="d">What’s happening this week</div></a>
+    <a class="tile" href="hotels.html"><div class="k">🏨 Hotels</div><div class="d">Top stays by budget & vibe</div></a>
+    <a class="tile" href="restaurants.html"><div class="k">🍴 Food</div><div class="d">Restaurants, cafes, vegan</div></a>
+    <a class="tile" href="music.html"><div class="k">🎶 Music</div><div class="d">Bars, parties, live sets</div></a>
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>Search results</h2><p class="muted">Type keywords (e.g. “yoga”, “arcotete”, “airport”, “vegan”).</p></div>
+    <div id="globalResults" class="search-results"></div>
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>Featured</h2><p class="muted">Highlighted posts, places, and events.</p></div>
+    <div id="featuredList" class="search-results"></div>
+  </section>
+  <section id="submit" class="card">
+    <div class="card-head"><h2>Submit an event / tip</h2><p class="muted">Connect to your Google Form / Tally.</p></div>
+    <div class="filters" style="padding:16px;">
+      <a class="btn" href="#" id="submitLink">Open submission form</a>
+      <a class="btn ghost" href="#" id="communityLink">Join community group</a>
+    </div>
+    <div class="card-foot muted small">Edit links at the bottom of <code>index.html</code>.</div>
   </section>
 </main>
-
-<footer class="container footer">
-  <div class="muted small">© San Cristóbal Guide</div>
-</footer>
-
+<footer class="container footer"><div class="muted small">© <span id="year"></span> San Cristóbal Guide</div></footer>
 <script src="assets/app.js"></script>
+<script>App.initHome({ submitUrl: "https://forms.gle/REPLACE_ME", communityUrl: "https://t.me/REPLACE_ME" });</script>
+
 </body>
 </html>

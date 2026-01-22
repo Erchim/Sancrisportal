@@ -1,8 +1,32 @@
 {
   "places": [
     {
+      "slug": "el-arcotete",
       "title": "El Arcotete",
-      "description": "Caves and river park near the city."
+      "distance": "20–25 min",
+      "category": "Nature",
+      "tags": [
+        "caves",
+        "river",
+        "family"
+      ],
+      "excerpt": "Caves + riverside park for an easy half‑day trip.",
+      "featured": true,
+      "priority": 8
+    },
+    {
+      "slug": "cenote-chukumaltik",
+      "title": "Cenote Chukumaltik (near Comitán)",
+      "distance": "1h 40m",
+      "category": "Nature",
+      "tags": [
+        "swim",
+        "day-trip",
+        "cenote"
+      ],
+      "excerpt": "Crystal water cenote — perfect for a day trip.",
+      "featured": false,
+      "priority": 0
     }
   ]
 }
