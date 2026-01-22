@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Event — Events San Cristóbal</title>
+  <meta name="description" content="Event details." />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="container header">
+    <div class="brand">
+      <div class="logo">ES</div>
+      <div>
+        <div class="brand-title">Events San Cristóbal</div>
+        <div class="brand-sub">Event details</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="events.html">Events</a>
+      <a href="blog.html">Guides</a>
+      <a class="btn" href="https://instagram.com/events.sancristobal" target="_blank" rel="noreferrer">Instagram</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div id="eventDetails" class="stack"></div>
+      <div class="card-foot">
+        <a href="events.html">← Back to events</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <div class="muted small">© <span id="year"></span> Events San Cristóbal</div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+  <script>
+    window.App.initEventDetails({
+      eventsUrl: "data/events.json"
+    });
+  </script>
+</body>
+</html>

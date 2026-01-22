@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Guides — Events San Cristóbal</title>
+  <meta name="description" content="Guides and useful information for visitors in San Cristóbal." />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="container header">
+    <div class="brand">
+      <div class="logo">ES</div>
+      <div>
+        <div class="brand-title">Events San Cristóbal</div>
+        <div class="brand-sub">Guides & articles</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="events.html">Events</a>
+      <a class="active" href="blog.html">Guides</a>
+      <a class="btn" href="https://instagram.com/events.sancristobal" target="_blank" rel="noreferrer">Instagram</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="card-head">
+        <h1>Guides</h1>
+        <p class="muted">Short, practical articles. You can write them in Markdown.</p>
+      </div>
+      <div id="blogList" class="list"></div>
+      <div class="card-foot muted small">
+        Articles are listed in <code>data/blog.json</code>, content lives in <code>/posts</code>.
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <div class="muted small">© <span id="year"></span> Events San Cristóbal</div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+  <script>
+    window.App.initBlogList({
+      blogUrl: "data/blog.json"
+    });
+  </script>
+</body>
+</html>

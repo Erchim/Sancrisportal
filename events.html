@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Events — Events San Cristóbal</title>
+  <meta name="description" content="Upcoming events in San Cristóbal de las Casas." />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <header class="container header">
+    <div class="brand">
+      <div class="logo">ES</div>
+      <div>
+        <div class="brand-title">Events San Cristóbal</div>
+        <div class="brand-sub">Events calendar & filters</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a class="active" href="events.html">Events</a>
+      <a href="blog.html">Guides</a>
+      <a class="btn" href="https://instagram.com/events.sancristobal" target="_blank" rel="noreferrer">Instagram</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="card-head">
+        <h1>Events</h1>
+        <div class="filters filters-wrap">
+          <input id="q" class="input" placeholder="Search (yoga, live music, salsa, cacao…)" />
+          <input id="from" class="input" type="date" aria-label="From date" />
+          <input id="to" class="input" type="date" aria-label="To date" />
+          <select id="category" class="input" aria-label="Category">
+            <option value="">All categories</option>
+          </select>
+          <select id="price" class="input" aria-label="Price">
+            <option value="">Any price</option>
+            <option value="free">Free</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="eventsAll" class="list"></div>
+      <div class="card-foot muted small">
+        Editing events is done in <code>data/events.json</code>.
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <div class="muted small">© <span id="year"></span> Events San Cristóbal</div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+  <script>
+    window.App.initEventsPage({
+      eventsUrl: "data/events.json"
+    });
+  </script>
+</body>
+</html>
