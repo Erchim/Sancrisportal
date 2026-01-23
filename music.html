@@ -7,7 +7,7 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0b0c10" />
-  <link rel="stylesheet" href="assets/style.css?v=13.0" />
+  <link rel="stylesheet" href="assets/style.css?v=16.0" />
   <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
   <meta name="robots" content="index,follow" />
 
@@ -58,9 +58,23 @@
     <div class="card-head">
       <h1>Music & Parties</h1>
       <p>Bars, parties, live sets.</p>
-      <div class="filters">
-        <input id="musicSearch" class="input" placeholder="Search..." />
-        <button id="musicBtn" class="btn ghost" type="button">Search</button>
+      <div class="toolbar">
+        <div class="row">
+          <input id="musicSearch" class="input" placeholder="Search (live, DJ, salsa…)" />
+          <button id="musicBtn" class="btn ghost" type="button">Search</button>
+        </div>
+        <div class="facets">
+          <select id="musicGenre" class="input"><option value="">All genres</option></select>
+          <select id="musicArea" class="input"><option value="">All areas</option></select>
+          <select id="musicSort" class="input">
+            <option value="featured">Featured</option>
+            <option value="az">A → Z</option>
+          </select>
+        </div>
+        <div class="summary">
+          <p id="musicSummary" class="muted small"></p>
+          <p class="muted small">Tip: use 🔍 for global search.</p>
+        </div>
       </div>
     </div>
     <div id="musicList" class="list"></div>
@@ -71,32 +85,35 @@
 <footer class="container footer">
   <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
-<script src="assets/app.js?v=13.0"></script>
+<script src="assets/app.js?v=16.0"></script>
 
 <script>
-App.initListPage({
+App.initCatalogPage({
   dataset: "data/music.json",
   searchInputId: "musicSearch",
   searchBtnId: "musicBtn",
   listId: "musicList",
+  facetSelects: [
+    { id: "musicGenre", key: "genre", allLabel: "All genres" },
+    { id: "musicArea", key: "area", allLabel: "All areas" }
+  ],
+  sortSelectId: "musicSort",
+  summaryId: "musicSummary",
   renderItem: (x) => {
     const el = document.createElement("div");
     el.className = "item";
     const cover = x.cover || "assets/images/cover_default.jpg";
-    const title = x.place || "Item";
-    const meta = [];
-    if (x.type) meta.push(`🏷️ ${x.type}`);
-    if (x.genre) meta.push(`🎶 ${x.genre}`);
-    if (x.price) meta.push(`💰 ${x.price}`);
-    if (x.area) meta.push(`📍 ${x.area}`);
+    const title = x.place || "Place";
+    const addr = x.address || "San Cristóbal de las Casas";
+    const map = x.map_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(title + " " + addr)}`;
+    const link = x.link || "";
     el.innerHTML = `
       <div class="cover" style="background-image:url('${cover}')"></div>
       <div>
         <h3><a href="item.html?type=music&id=${encodeURIComponent(x.id)}">${title}</a></h3>
         <div class="meta">${[
-          x.type ? x.type : null,
-          x.area ? x.area : null,
-          x.best_day ? x.best_day : null
+          x.genre ? x.genre : null,
+          x.area ? x.area : null
         ].filter(Boolean).join(" • ")}</div>
         <div class="badges">
           ${(x.tags||[]).slice(0,5).map(t=>`<span class="badge">${t}</span>`).join("")}
@@ -105,10 +122,13 @@ App.initListPage({
         <div class="muted small" style="margin-top:8px;">${x.description || ""}</div>
         ${x.address ? `<div class="muted small" style="margin-top:8px;">📍 ${x.address}</div>` : ""}
       </div>
-      <div style="display:grid;place-items:center;gap:10px;">
+      <div class="actions">
+        <a class="btn ghost" target="_blank" rel="noreferrer" href="${map}">Map</a>
+        ${link ? `<a class="btn ghost" target="_blank" rel="noreferrer" href="${link}">Link</a>` : ""}
         <a class="btn" href="item.html?type=music&id=${encodeURIComponent(x.id)}">Open</a>
       </div>
-    `;    return el;
+    `;
+    return el;
   }
 });
 </script>
