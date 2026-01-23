@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title data-site-title>Events San Cristobal</title>
   <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
-  <link rel="stylesheet" href="assets/style.css?v=8.0" />
+  <link rel="stylesheet" href="assets/style.css?v=13.0" />
   <link rel="icon" href="assets/favicon.svg" />
 </head>
 <body>
@@ -28,14 +28,16 @@
     </button>
   </div>
 
-  <div class="search-panel" id="searchPanel">
+  <div class="search-panel" id="searchPanel" hidden>
     <form class="search-form" id="searchForm" action="search.html" method="GET">
       <input class="input" id="headerSearchInput" name="q" placeholder="Search…" autocomplete="off" />
       <button class="btn" type="submit">Search</button>
     </form>
+    <div class="suggestions" id="headerSuggestions" hidden></div>
   </div>
 
-  <nav class="nav-panel" id="siteNav" aria-label="Site">
+  <nav class="nav-panel" id="siteNav" aria-label="Site" hidden>
+    <a href="search.html" data-action="open-search">Search</a>
     <a href="index.html">Home</a>
     <a href="articles.html">Life</a>
     <a href="nature.html">Nature</a>
@@ -60,7 +62,22 @@
       <button class="btn" type="submit">Search</button>
     </form>
 
+    
+    <div class="search-tools">
+      <div class="chips" id="searchChips" aria-label="Filter results"></div>
+      <div class="search-sort">
+        <select id="sortSelect" class="select" aria-label="Sort results">
+          <option value="relevance">Relevance</option>
+          <option value="featured">Featured</option>
+          <option value="az">A–Z</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="result-meta muted small" id="resultMeta"></div>
+
     <div id="searchResults" class="result-grid"></div>
+    
   </section>
 </main>
 
@@ -68,7 +85,7 @@
   <div class="muted small">© <span id="year"></span> <span data-site-title>Events San Cristobal</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
 
-<script src="assets/app.js?v=8.0"></script>
+<script src="assets/app.js?v=13.0"></script>
 <script>App.initSearchPage();</script>
 </body>
 </html>

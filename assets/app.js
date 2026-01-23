@@ -12,11 +12,24 @@ function initMenu(){
   const nav = document.getElementById("siteNav");
   if(!btn || !nav) return;
 
+  const searchBtn = document.getElementById("searchBtn");
+  const searchPanel = document.getElementById("searchPanel");
+
+  const closeSearch = ()=>{
+    if(!searchPanel || !searchBtn) return;
+    searchPanel.classList.remove("open");
+    searchPanel.hidden = true;
+    searchBtn.setAttribute("aria-expanded","false");
+  };
+
   function close(){
     nav.classList.remove("open");
+    nav.hidden = true;
     btn.setAttribute("aria-expanded","false");
   }
   function open(){
+    closeSearch();
+    nav.hidden = false;
     nav.classList.add("open");
     btn.setAttribute("aria-expanded","true");
   }
@@ -26,7 +39,25 @@ function initMenu(){
     nav.classList.contains("open") ? close() : open();
   });
 
-  nav.querySelectorAll("a").forEach(a=>a.addEventListener("click", ()=>close()));
+  nav.querySelectorAll("a").forEach(a=>a.addEventListener("click", (e)=>{
+    const action = a.getAttribute("data-action");
+    if(action === "open-search"){
+      e.preventDefault();
+      close();
+      // open header search panel
+      if(searchPanel && searchBtn){
+        searchPanel.hidden = false;
+        searchPanel.classList.add("open");
+        searchBtn.setAttribute("aria-expanded","true");
+        const input = document.getElementById("headerSearchInput");
+        if(input) setTimeout(()=>input.focus(), 50);
+      } else {
+        location.href = "search.html";
+      }
+      return;
+    }
+    close();
+  }));
 
   document.addEventListener("click", (e)=>{
     if(!nav.classList.contains("open")) return;
@@ -43,13 +74,27 @@ function initHeaderSearch(){
   const btn = document.getElementById("searchBtn");
   const panel = document.getElementById("searchPanel");
   const input = document.getElementById("headerSearchInput");
+  const sugg = document.getElementById("headerSuggestions");
   if(!btn || !panel || !input) return;
+
+  let built = false;
+  const ensureIndex = async ()=>{
+    if(built) return;
+    try{ await Search.build(); }catch(e){}
+    built = true;
+  };
 
   function close(){
     panel.classList.remove("open");
+    if(sugg){sugg.hidden=true; sugg.innerHTML="";}
+    panel.hidden = true;
     btn.setAttribute("aria-expanded","false");
   }
   function open(){
+    const nav=document.getElementById("siteNav");
+    const mb=document.getElementById("menuBtn");
+    if(nav&&mb){nav.classList.remove("open");nav.hidden=true; mb.setAttribute("aria-expanded","false");}
+    panel.hidden = false;
     panel.classList.add("open");
     btn.setAttribute("aria-expanded","true");
     setTimeout(()=>input.focus(), 50);
@@ -72,6 +117,33 @@ function initHeaderSearch(){
     if(e.key==="Escape") close();
   });
 
+  // Suggestions (typeahead) inside header search
+  if(sugg){
+    const render = (items)=>{
+      if(!items.length){sugg.hidden=true; sugg.innerHTML=""; return;}
+      sugg.hidden=false;
+      sugg.innerHTML = items.map(it=>{
+        const type = esc(it.type);
+        const title = esc(it.title);
+        const sub = esc(it.snippet||"");
+        return `<a class="suggestion" href="${esc(it.url)}"><span class="t">${title}</span><span class="meta">${type}${sub?` • ${sub}`:""}</span></a>`;
+      }).join("");
+      // clicking a suggestion closes the panel
+      sugg.querySelectorAll("a").forEach(a=>a.addEventListener("click", ()=>close()));
+    };
+
+    let t = null;
+    input.addEventListener("input", ()=>{
+      const q = input.value || "";
+      if((q||"").trim().length < 2){ render([]); return; }
+      clearTimeout(t);
+      t = setTimeout(async ()=>{
+        await ensureIndex();
+        render(Search.query(q, 6));
+      }, 120);
+    });
+  }
+
   // If user presses Enter in the input while the panel is open, let the form submit normally
 }
 
@@ -83,13 +155,13 @@ if(s.site_title)document.title=document.title.replace("{{SITE_TITLE}}",s.site_ti
 const Search={ready:false,items:[],async build(){if(this.ready)return;
 const [A,P,F,H,R,M,E]=await Promise.all([fetchJson("data/articles.json"),fetchJson("data/places.json"),fetchJson("data/faq.json"),fetchJson("data/hotels.json"),fetchJson("data/restaurants.json"),fetchJson("data/music.json"),fetchJson("data/events.json")]);
 const items=[];
-for(const a of (A.articles||[])){const md=await fetchText(`posts/${a.slug}.md`);items.push({type:"Article",title:a.title,url:`post.html?slug=${encodeURIComponent(a.slug)}`,cover:a.cover||"assets/images/cover_default.jpg",text:norm([a.title,a.excerpt,a.description,a.category,(a.tags||[]).join(" "),md].join(" ")),featured:!!a.featured,priority:+(a.priority||0),snippet:(a.category||"Life"),snippet_long:(a.excerpt||a.description||"")});}
-for(const p of (P.places||[])){const md=await fetchText(`posts/${p.slug}.md`);items.push({type:"Place",title:p.title,url:`post.html?slug=${encodeURIComponent(p.slug)}`,cover:p.cover||"assets/images/cover_default.jpg",text:norm([p.title,p.excerpt,p.description,p.distance,p.category,(p.tags||[]).join(" "),md].join(" ")),featured:!!p.featured,priority:+(p.priority||0),snippet:[p.distance,p.category].filter(Boolean).join(" • ")||"Nature",snippet_long:(p.excerpt||p.description||"")});}
+for(const a of (A.articles||[])){const md=await fetchText(`posts/${a.slug}.md`);items.push({type:"Article",title:a.title,url:`post.html?slug=${encodeURIComponent(a.slug)}`,cover:a.cover||"assets/images/cover_default.jpg",text:norm([a.title,a.excerpt,a.description,a.category,(a.tags||[]).join(" "),md].join(" ")),featured:!!a.featured,priority:+(a.priority||0),snippet:[a.date, (a.category||"Life")].filter(Boolean).join(" • ")||"Life",snippet_long:(a.excerpt||a.description||"")});}
+for(const p of (P.places||[])){const md=await fetchText(`posts/${p.slug}.md`);items.push({type:"Place",title:p.title,url:`post.html?slug=${encodeURIComponent(p.slug)}`,cover:p.cover||"assets/images/cover_default.jpg",text:norm([p.title,p.excerpt,p.description,p.distance,p.category,(p.tags||[]).join(" "),md].join(" ")),featured:!!p.featured,priority:+(p.priority||0),snippet:[p.distance,p.duration,p.category].filter(Boolean).join(" • ")||"Nature",snippet_long:(p.excerpt||p.description||"")});}
 for(const f of (F.faq||[])){items.push({type:"FAQ",title:f.q,url:`faq.html#${encodeURIComponent(f.id||"")}`,cover:"assets/images/cover_default.jpg",text:norm([f.q,f.a,(f.tags||[]).join(" ")].join(" ")),featured:!!f.featured,priority:+(f.priority||0),snippet:(f.a||"").slice(0,140)});}
-for(const h of (H.hotels||[])){items.push({type:"Hotel",title:h.name,url:`item.html?type=hotels&id=${encodeURIComponent(h.id||"")}`,cover:h.cover||"assets/images/cover_default.jpg",text:norm([h.name,h.type,h.price,h.area,h.description,h.address,(h.tags||[]).join(" ")].join(" ")),featured:!!h.featured,priority:+(h.priority||0),snippet:[h.area,h.price].filter(Boolean).join(" • ")||"Hotel",snippet_long:(h.description||"")});}
-for(const r of (R.restaurants||[])){items.push({type:"Restaurant",title:r.name,url:`item.html?type=restaurants&id=${encodeURIComponent(r.id||"")}`,cover:r.cover||"assets/images/cover_default.jpg",text:norm([r.name,r.type,r.price,r.area,r.description,r.address,(r.tags||[]).join(" ")].join(" ")),featured:!!r.featured,priority:+(r.priority||0),snippet:[r.type,r.price,r.area].filter(Boolean).join(" • ")||"Food",snippet_long:(r.description||"")});}
-for(const m of (M.music||[])){items.push({type:"Music",title:m.place,url:`item.html?type=music&id=${encodeURIComponent(m.id||"")}`,cover:m.cover||"assets/images/cover_default.jpg",text:norm([m.place,m.genre,m.description,m.address,(m.tags||[]).join(" ")].join(" ")),featured:!!m.featured,priority:+(m.priority||0),snippet:[m.genre,m.best_day].filter(Boolean).join(" • ")||"Music",snippet_long:(m.description||"")});}
-for(const e of (E.events||[])){items.push({type:"Event",title:e.title,url:`event.html?id=${encodeURIComponent(e.id)}`,cover:e.cover||"assets/images/cover_default.jpg",text:norm([e.title,e.description,e.category,e.venue,e.address,e.date,e.time,(e.tags||[]).join(" ")].join(" ")),featured:!!e.featured,priority:+(e.priority||0),snippet:`${e.date} • ${e.time||"TBA"} • ${e.venue||""}`});}
+for(const h of (H.hotels||[])){items.push({type:"Hotel",title:h.name,url:`item.html?type=hotels&id=${encodeURIComponent(h.id||"")}`,cover:h.cover||"assets/images/cover_default.jpg",text:norm([h.name,h.type,h.price,h.area,h.description,h.address,(h.tags||[]).join(" ")].join(" ")),featured:!!h.featured,priority:+(h.priority||0),snippet:[h.type,h.area,h.price].filter(Boolean).join(" • ")||"Hotel",snippet_long:(h.description||"")});}
+for(const r of (R.restaurants||[])){items.push({type:"Restaurant",title:r.name,url:`item.html?type=restaurants&id=${encodeURIComponent(r.id||"")}`,cover:r.cover||"assets/images/cover_default.jpg",text:norm([r.name,r.type,r.price,r.area,r.description,r.address,(r.tags||[]).join(" ")].join(" ")),featured:!!r.featured,priority:+(r.priority||0),snippet:[r.type,r.area,r.price].filter(Boolean).join(" • ")||"Food",snippet_long:(r.description||"")});}
+for(const m of (M.music||[])){items.push({type:"Music",title:m.place,url:`item.html?type=music&id=${encodeURIComponent(m.id||"")}`,cover:m.cover||"assets/images/cover_default.jpg",text:norm([m.place,m.genre,m.description,m.address,(m.tags||[]).join(" ")].join(" ")),featured:!!m.featured,priority:+(m.priority||0),snippet:[m.genre,m.best_day,m.area].filter(Boolean).join(" • ")||"Music",snippet_long:(m.description||"")});}
+for(const e of (E.events||[])){items.push({type:"Event",title:e.title,url:`event.html?id=${encodeURIComponent(e.id)}`,cover:e.cover||"assets/images/cover_default.jpg",text:norm([e.title,e.description,e.category,e.venue,e.address,e.date,e.time,(e.tags||[]).join(" ")].join(" ")),featured:!!e.featured,priority:+(e.priority||0),snippet:[e.date, e.time||"TBA", e.venue].filter(Boolean).join(" • "),snippet_long:(e.description||"")});}
 items.sort((a,b)=>(b.featured-a.featured)||(b.priority-a.priority)||a.title.localeCompare(b.title));
 this.items=items;this.ready=true;},
 query(q,limit=30){const qq=norm(q);if(!qq)return[];const parts=qq.split(" ").filter(Boolean);const scored=[];
@@ -183,60 +255,196 @@ document.title=`${e.title} — ${document.title}`;};
 App.initSearchPage=async function(){
   await App.initSite();
   await Search.build();
-  const params=new URLSearchParams(location.search);
-  const q=params.get("q")||"";
+
   const input=document.getElementById("searchInput");
   const out=document.getElementById("searchResults");
   const qLabel=document.getElementById("queryLabel");
-  if(input) input.value=q;
-  if(qLabel) qLabel.textContent=q ? `Results for “${q}”` : "Search the portal";
-  function renderCards(rs){
+  const chips=document.getElementById("searchChips");
+  const meta=document.getElementById("resultMeta");
+  const sortSelect=document.getElementById("sortSelect");
+  const form=document.getElementById("searchPageForm");
+
+  const kindLabel={
+    "article":"Life",
+    "place":"Nature",
+    "event":"Events",
+    "hotel":"Hotels",
+    "restaurant":"Food",
+    "music":"Music",
+    "faq":"FAQ"
+  };
+  const kindOrder=["event","restaurant","hotel","music","article","place","faq"];
+  const kindOf=(item)=>String(item.type||"").toLowerCase();
+
+  function readState(){
+    const params=new URLSearchParams(location.search);
+    return {
+      q:(params.get("q")||"").trim(),
+      t:(params.get("t")||"").toLowerCase().trim(),
+      sort:(params.get("sort")||"relevance").toLowerCase().trim()
+    };
+  }
+
+  function buildUrl(next){
+    const u=new URL(location.href);
+    const p=u.searchParams;
+
+    const cur=readState();
+    const q = (next.q!=null) ? String(next.q||"").trim() : cur.q;
+    const t = (next.t!=null) ? String(next.t||"").toLowerCase().trim() : cur.t;
+    const sort = (next.sort!=null) ? String(next.sort||"relevance").toLowerCase().trim() : cur.sort;
+
+    if(q) p.set("q", q); else p.delete("q");
+    if(t) p.set("t", t); else p.delete("t");
+    if(sort && sort!=="relevance") p.set("sort", sort); else p.delete("sort");
+
+    u.search=p.toString();
+    return u.pathname + (u.search ? ("?"+u.searchParams.toString()) : "");
+  }
+
+  function sortResults(results, sort){
+    const rs=[...results];
+    if(sort==="az"){
+      rs.sort((a,b)=>String(a.title||"").localeCompare(String(b.title||""), undefined, {sensitivity:"base"}));
+      return rs;
+    }
+    if(sort==="featured"){
+      rs.sort((a,b)=> (b.featured-a.featured) || (b.priority-a.priority) || String(a.title||"").localeCompare(String(b.title||"")));
+      return rs;
+    }
+    return rs;
+  }
+
+  function renderChips(baseResults, activeT){
+    if(!chips) return;
+    const counts={};
+    for(const r of baseResults){
+      const k=kindOf(r);
+      counts[k]=(counts[k]||0)+1;
+    }
+    const parts=[];
+    parts.push({k:"", label:"All", n:baseResults.length});
+    for(const k of kindOrder){
+      if(counts[k]) parts.push({k, label:kindLabel[k]||k, n:counts[k]});
+    }
+
+    chips.innerHTML="";
+    for(const p of parts){
+      const b=document.createElement("button");
+      b.type="button";
+      b.className="chip" + ((p.k===activeT) ? " active" : "");
+      b.setAttribute("data-kind", p.k);
+      b.innerHTML = `${esc(p.label)} <span class="chip-count">${esc(p.n)}</span>`;
+      b.addEventListener("click", ()=>{
+        const url=buildUrl({t:p.k});
+        history.pushState({}, "", url);
+        renderFromUrl();
+      });
+      chips.appendChild(b);
+    }
+  }
+
+  function renderCards(q, t, sort){
     if(!out) return;
     out.innerHTML="";
-    if(!rs.length){
-      out.innerHTML=`<div class="muted small" style="padding:12px;">No results.</div>`;
+
+    if(qLabel) qLabel.textContent=q ? `Results for “${q}”` : "Search the portal";
+
+    if(!q){
+      if(meta) meta.textContent="Type a few keywords (e.g. “yoga”, “arcotete”, “airport”, “vegan”).";
+      out.innerHTML=`<div class="muted small" style="padding:12px;">Start typing to search across events, guides, places, hotels, food, music, and FAQ.</div>`;
+      renderChips([], t);
       return;
     }
+
+    const base=Search.query(q,120);
+    renderChips(base, t);
+
+    let rs=base;
+    if(t) rs = rs.filter(x=>kindOf(x)===t);
+    rs = sortResults(rs, sort).slice(0,40);
+
+    if(sortSelect) sortSelect.value=["relevance","featured","az"].includes(sort)?sort:"relevance";
+
+    if(meta){
+      const filterText = t ? ` • filtered: ${kindLabel[t]||t}` : "";
+      meta.textContent = `${rs.length} of ${base.length} results${filterText}`;
+    }
+
+    if(!rs.length){
+      out.innerHTML=`<div class="muted small" style="padding:12px;">No results. Try shorter keywords or another category.</div>`;
+      return;
+    }
+
     for(const r of rs){
-      const kind=(r.type||"").toLowerCase();
+      const kind=kindOf(r);
       const el=document.createElement("a");
       el.className="result-card";
       el.href=r.url;
       el.setAttribute("data-kind", kind);
-      const meta=r.snippet||"";
+
+      const metaLine=r.snippet||"";
+      const longLine=r.snippet_long||"";
+      const badge = kindLabel[kind] || r.type || "Result";
+
       el.innerHTML=`
         <div class="rc-cover" style="background-image:url('${esc(r.cover||"assets/images/cover_default.jpg")}')"></div>
         <div class="rc-body">
           <div class="rc-top">
-            <span class="rc-badge">${esc(r.type)}</span>
-            <span class="rc-meta">${esc(meta)}</span>
+            <span class="rc-badge">${esc(badge)}</span>
+            <span class="rc-meta">${esc(metaLine)}</span>
           </div>
           <div class="rc-title">${esc(r.title)}</div>
-          <div class="rc-snippet">${esc(r.snippet_long||r.snippet||"")}</div>
+          <div class="rc-snippet">${esc(longLine||metaLine||"")}</div>
         </div>`;
       out.appendChild(el);
     }
   }
-  function run(query){
-    const rs=Search.query(query,40);
-    renderCards(rs);
+
+  function renderFromUrl(){
+    const st=readState();
+    if(input) input.value=st.q;
+    renderCards(st.q, st.t, st.sort);
   }
-  if(input){
-    input.addEventListener("keydown",(e)=>{
-      if(e.key==="Enter"){e.preventDefault(); run(input.value||"");}
-    });
+
+  if(!App._searchPageBound){
+    App._searchPageBound=true;
+
+    if(input){
+      input.addEventListener("keydown",(e)=>{
+        if(e.key==="Enter"){
+          e.preventDefault();
+          const v=(input.value||"").trim();
+          const url=buildUrl({q:v});
+          history.pushState({}, "", url);
+          renderFromUrl();
+        }
+      });
+    }
+
+    if(form){
+      form.addEventListener("submit",(e)=>{
+        e.preventDefault();
+        const v=(input&&input.value)||"";
+        const url=buildUrl({q:v.trim()});
+        history.pushState({}, "", url);
+        renderFromUrl();
+      });
+    }
+
+    if(sortSelect){
+      sortSelect.addEventListener("change", ()=>{
+        const val=(sortSelect.value||"relevance").toLowerCase();
+        const url=buildUrl({sort:val});
+        history.pushState({}, "", url);
+        renderFromUrl();
+      });
+    }
+
+    window.addEventListener("popstate", renderFromUrl);
   }
-  const form=document.getElementById("searchPageForm");
-  if(form){
-    form.addEventListener("submit",(e)=>{
-      e.preventDefault();
-      const v=(input&&input.value)||"";
-      history.replaceState({}, "", v?`search.html?q=${encodeURIComponent(v)}`:"search.html");
-      if(qLabel) qLabel.textContent=v ? `Results for “${v}”` : "Search the portal";
-      run(v);
-    });
-  }
-  run(q);
+
+  renderFromUrl();
 };
 
 window.App=App;})();

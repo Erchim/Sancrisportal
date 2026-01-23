@@ -7,7 +7,7 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0b0c10" />
-  <link rel="stylesheet" href="assets/style.css?v=8.0" />
+  <link rel="stylesheet" href="assets/style.css?v=13.0" />
   <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
   <meta name="robots" content="index,follow" />
 
@@ -31,14 +31,16 @@
     </button>
   </div>
 
-  <div class="search-panel" id="searchPanel">
+  <div class="search-panel" id="searchPanel" hidden>
     <form class="search-form" id="searchForm" action="search.html" method="GET">
       <input class="input" id="headerSearchInput" name="q" placeholder="Search…" autocomplete="off" />
       <button class="btn" type="submit">Search</button>
     </form>
+    <div class="suggestions" id="headerSuggestions" hidden></div>
   </div>
 
-  <nav class="nav-panel" id="siteNav" aria-label="Site">
+  <nav class="nav-panel" id="siteNav" aria-label="Site" hidden>
+    <a href="search.html" data-action="open-search">Search</a>
     <a href="index.html">Home</a>
     <a href="articles.html">Life</a>
     <a href="nature.html">Nature</a>
@@ -55,11 +57,8 @@
   <section class="hero">
     <h1>San Cristóbal de las Casas</h1>
     <p class="lead">A simple hub for travelers: events, guides, nature trips, food, stays, and practical tips — in one place.</p>
-    <p class="muted">Our mission: make information easy to find, so you spend less time searching and more time enjoying the city.</p>
-    <div class="filters">
-      <a class="btn ghost" id="igBtn" href="#" target="_blank" rel="noreferrer">Open Instagram</a>
-      <a class="btn" href="submit.html">Submit an Event</a>
-    </div>
+    <p class="muted">Our mission: make information easy to find — less searching, more enjoying the city.</p>
+    <p class="muted small">Tip: tap 🔍 to search, or ☰ to browse categories.</p>
   </section>
 
   <section class="grid tiles">
@@ -88,7 +87,7 @@
 <footer class="container footer">
   <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
-<script src="assets/app.js?v=8.0"></script>
+<script src="assets/app.js?v=13.0"></script>
 
 <script>App.initHome();</script>
 
