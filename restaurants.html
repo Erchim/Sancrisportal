@@ -1,13 +1,16 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <title>Restaurants — {SITE_TITLE}</title>
+  <title>Food — {{SITE_TITLE}}</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="assets/style.css" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0b0c10" />
+  <link rel="stylesheet" href="assets/style.css?v=6.0" />
+  <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
+  <meta name="robots" content="index,follow" />
+
 </head>
 <body>
 <header class="container header">
@@ -18,7 +21,11 @@
       <div class="brand-sub" data-site-sub>Local guides • Events • Tips</div>
     </div>
   </div>
-  <nav class="nav">
+  <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">
+    <span class="menu-icon" aria-hidden="true"><i></i></span>
+    <span class="menu-label">Menu</span>
+  </button>
+  <nav class="nav" id="siteNav">
     <a href="index.html">Home</a>
     <a href="articles.html">Life</a>
     <a href="nature.html">Nature</a>
@@ -35,47 +42,61 @@
   <section class="card">
     <div class="card-head">
       <h1>Restaurants</h1>
+      <p>Food, cafes, vegan and local cuisine.</p>
       <div class="filters">
         <input id="restaurantsSearch" class="input" placeholder="Search..." />
+        <button id="restaurantsBtn" class="btn ghost" type="button">Search</button>
       </div>
     </div>
     <div id="restaurantsList" class="list"></div>
-    <div class="card-foot muted small">Edit list in <span class="kbd">data/restaurants.json</span>. Add cover images in <span class="kbd">assets/images</span>.</div>
+    <div class="card-foot muted small">Edit data in <span class="kbd">data/restaurants.json</span>.</div>
   </section>
 </main>
 
 <footer class="container footer">
   <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
-<script src="assets/app.js"></script>
+<script src="assets/app.js?v=6.0"></script>
+
 <script>
-  App.initListPage({
-    dataset: "data/restaurants.json",
-    searchInputId: "restaurantsSearch",
-    listId: "restaurantsList",
-    renderItem: (x) => {
-      const el = document.createElement("div");
-      el.className = "item with-cover";
-      const title = x.name || x.place || "";
-      const meta = [x.type, x.area, x.price].filter(Boolean).join(" • ");
-      el.innerHTML = `
-        <div class="cover"><img src="${x.cover || 'assets/images/cover-post.svg'}" alt="" /></div>
-        <div>
-          <h3 style="margin:0 0 6px 0;">${title}</h3>
-          <div class="meta"><span>${meta}</span></div>
-          <div class="badges">
-            ${(x.tags||[]).slice(0,4).map(t=>`<span class="badge">${t}</span>`).join("")}
-            ${x.featured ? `<span class="badge accent">Featured</span>` : ""}
-          </div>
-          ${x.description ? `<div class="muted small" style="margin-top:8px;">${x.description}</div>` : ""}
+App.initListPage({
+  dataset: "data/restaurants.json",
+  searchInputId: "restaurantsSearch",
+  searchBtnId: "restaurantsBtn",
+  listId: "restaurantsList",
+  renderItem: (x) => {
+    const el = document.createElement("div");
+    el.className = "item";
+    const cover = x.cover || "assets/images/cover_default.jpg";
+    const title = x.name || "Item";
+    const meta = [];
+    if (x.type) meta.push(`🏷️ ${x.type}`);
+    if (x.genre) meta.push(`🎶 ${x.genre}`);
+    if (x.price) meta.push(`💰 ${x.price}`);
+    if (x.area) meta.push(`📍 ${x.area}`);
+    el.innerHTML = `
+      <div class="cover" style="background-image:url('${cover}')"></div>
+      <div>
+        <h3><a href="item.html?type=restaurants&id=${encodeURIComponent(x.id)}">${title}</a></h3>
+        <div class="meta">${[
+          x.cuisine ? x.cuisine : null,
+          x.price ? x.price : null,
+          x.area ? x.area : null
+        ].filter(Boolean).join(" • ")}</div>
+        <div class="badges">
+          ${(x.tags||[]).slice(0,5).map(t=>`<span class="badge">${t}</span>`).join("")}
+          ${x.featured ? `<span class="badge accent">Featured</span>` : ""}
         </div>
-        <div style="display:grid;place-items:center;">
-          <a class="btn" href="item.html?type=restaurants&id=${encodeURIComponent(x.id)}">View</a>
-        </div>
-      `;
-      return el;
-    }
-  });
+        <div class="muted small" style="margin-top:8px;">${x.description || ""}</div>
+        ${x.address ? `<div class="muted small" style="margin-top:8px;">📍 ${x.address}</div>` : ""}
+      </div>
+      <div style="display:grid;place-items:center;gap:10px;">
+        <a class="btn" href="item.html?type=restaurants&id=${encodeURIComponent(x.id)}">Open</a>
+      </div>
+    `;    return el;
+  }
+});
 </script>
+
 </body>
 </html>

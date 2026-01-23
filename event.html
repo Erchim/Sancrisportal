@@ -4,10 +4,13 @@
   <title>Event — {{SITE_TITLE}}</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="assets/style.css" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0b0c10" />
+  <link rel="stylesheet" href="assets/style.css?v=6.0" />
+  <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
+  <meta name="robots" content="index,follow" />
+
 </head>
 <body>
 <header class="container header">
@@ -18,7 +21,11 @@
       <div class="brand-sub" data-site-sub>Local guides • Events • Tips</div>
     </div>
   </div>
-  <nav class="nav">
+  <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">
+    <span class="menu-icon" aria-hidden="true"><i></i></span>
+    <span class="menu-label">Menu</span>
+  </button>
+  <nav class="nav" id="siteNav">
     <a href="index.html">Home</a>
     <a href="articles.html">Life</a>
     <a href="nature.html">Nature</a>
@@ -32,13 +39,12 @@
 </header>
 
 <main class="container">
-  <section class="hero-card">
-    <div class="hero-media"><img id="eventHero" alt="" /></div>
-    <div class="hero-body">
-      <div id="eventDetails"></div>
-      <div class="filters" style="margin-top:14px;">
-        <a class="btn ghost" href="events.html">← Back to events</a>
-      </div>
+  <section class="card">
+    <div class="detail-wrap">
+      <div id="detailHero" class="hero-img" style="background-image:url('assets/images/cover_default.jpg')"></div>
+      <h1 id="detailTitle" class="detail-title">Event</h1>
+      <p id="detailDesc" class="detail-desc"></p>
+      <div id="detailBody" class="prose-body"></div>
     </div>
   </section>
 </main>
@@ -46,47 +52,9 @@
 <footer class="container footer">
   <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
-<script src="assets/app.js"></script>
-<script>
-  (async () => {
-    await App.initSite();
-    const params = new URLSearchParams(location.search);
-    const id = params.get("id");
-    const data = await (await fetch("data/events.json", {cache:"no-store"})).json();
-    const e = (data.events || []).find(x => String(x.id) === String(id));
-    const hero = document.getElementById("eventHero");
-    const box = document.getElementById("eventDetails");
-    if (!e) {
-      hero.src = "assets/images/cover-events.svg";
-      box.innerHTML = `<h1 style="margin:0;">Event not found</h1><p class="muted">Wrong or missing event id.</p>`;
-      return;
-    }
-    hero.src = e.cover || "assets/images/cover-events.svg";
-    hero.alt = e.title || "";
+<script src="assets/app.js?v=6.0"></script>
 
-    const priceText = (e.price === 0 || (typeof e.price === "string" && String(e.price).toLowerCase() === "free")) ? "Free" : (typeof e.price === "number" ? `$${e.price} MXN` : "Paid");
+<script>App.initEventDetails();</script>
 
-    box.innerHTML = `
-      <h1 style="margin:0;">${e.title}</h1>
-      ${e.description ? `<p class="lead" style="margin:8px 0 0 0;">${e.description}</p>` : ""}
-      <div class="meta" style="margin-top:10px;">
-        <span class="badge accent">🗓️ ${e.date}</span>
-        <span class="badge accent">🕒 ${e.time || "TBA"}</span>
-        <span class="badge accent">🏷️ ${e.category || "General"}</span>
-        <span class="badge accent">💰 ${priceText}</span>
-      </div>
-      <div class="badges" style="margin-top:12px;">
-        <span class="badge">📍 ${e.venue || "TBA"}</span>
-        ${e.address ? `<span class="badge">🧭 ${e.address}</span>` : ""}
-        ${(e.tags || []).slice(0,4).map(t=>`<span class="badge">${t}</span>`).join("")}
-      </div>
-      <div class="filters" style="margin-top:14px;">
-        ${e.source_url ? `<a class="btn" target="_blank" rel="noreferrer" href="${e.source_url}">Source / flyer</a>` : ""}
-        ${e.contact ? `<span class="muted small" style="align-self:center;">Contact: ${e.contact}</span>` : ""}
-      </div>
-    `;
-    document.title = `${e.title} — ${document.title}`;
-  })();
-</script>
 </body>
 </html>

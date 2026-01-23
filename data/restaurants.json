@@ -10,13 +10,13 @@
         "mexican",
         "fine-dining"
       ],
+      "description": "Local cuisine with a refined approach. Great for a special dinner.",
+      "address": "Centro (example)",
+      "map_url": "",
       "link": "",
+      "cover": "assets/images/cover_default.jpg",
       "featured": true,
-      "priority": 6,
-      "cover": "assets/images/cover-food.svg",
-      "description": "",
-      "address": "",
-      "map_url": ""
+      "priority": 6
     },
     {
       "id": "madre-tierra",
@@ -28,13 +28,13 @@
         "vegan",
         "coffee"
       ],
+      "description": "Healthy plates, vegan options and good coffee.",
+      "address": "Centro (example)",
+      "map_url": "",
       "link": "",
+      "cover": "assets/images/cover_default.jpg",
       "featured": false,
-      "priority": 0,
-      "cover": "assets/images/cover-food.svg",
-      "description": "",
-      "address": "",
-      "map_url": ""
+      "priority": 0
     }
   ]
 }

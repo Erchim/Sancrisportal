@@ -10,10 +10,10 @@
         "how-to"
       ],
       "excerpt": "How to browse events, read guides, and submit your own information.",
+      "description": "Short orientation for travelers and locals: how to use the portal, find events, and submit tips.",
+      "cover": "assets/images/cover_default.jpg",
       "featured": true,
-      "priority": 9,
-      "cover": "assets/images/cover-life.svg",
-      "description": "How to browse events, read guides, and submit your own information."
+      "priority": 9
     },
     {
       "slug": "cost-of-living",
@@ -26,10 +26,10 @@
         "food"
       ],
       "excerpt": "Quick reference costs for rent, food, transport and daily life.",
+      "description": "A practical breakdown (rent, food, taxis, coffee) with real ranges and local notes.",
+      "cover": "assets/images/cover_cost.jpg",
       "featured": false,
-      "priority": 0,
-      "cover": "assets/images/cover-life.svg",
-      "description": "Quick reference costs for rent, food, transport and daily life."
+      "priority": 0
     }
   ]
 }

@@ -8,13 +8,13 @@
         "live",
         "bar"
       ],
+      "description": "Popular venue for live music nights.",
+      "address": "Centro (example)",
+      "map_url": "",
       "link": "",
+      "cover": "assets/images/cover_default.jpg",
       "featured": true,
-      "priority": 6,
-      "cover": "assets/images/cover-music.svg",
-      "description": "",
-      "address": "",
-      "map_url": ""
+      "priority": 6
     },
     {
       "id": "latin-night",
@@ -24,13 +24,13 @@
         "party",
         "dance"
       ],
-      "link": "",
-      "featured": false,
-      "priority": 0,
-      "cover": "assets/images/cover-music.svg",
-      "description": "",
+      "description": "Dance-focused nights around the city (rotating places).",
       "address": "",
-      "map_url": ""
+      "map_url": "",
+      "link": "",
+      "cover": "assets/images/cover_default.jpg",
+      "featured": false,
+      "priority": 0
     }
   ]
 }

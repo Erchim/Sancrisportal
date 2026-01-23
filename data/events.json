@@ -15,11 +15,11 @@
         "drinks"
       ],
       "description": "Live jazz set + open jam. Arrive early for good seats.",
+      "cover": "assets/images/cover_jazz.jpg",
       "contact": "+52 000 000 0000",
       "source_url": "https://instagram.com/events.sancristobal",
       "featured": true,
-      "priority": 10,
-      "cover": "assets/images/cover-events.svg"
+      "priority": 10
     },
     {
       "id": "2026-01-26-yoga-sunrise",
@@ -36,11 +36,11 @@
         "wellness"
       ],
       "description": "Bring water and a mat. Beginner-friendly.",
+      "cover": "assets/images/cover_default.jpg",
       "contact": "WhatsApp: +52 000 000 0000",
       "source_url": "",
       "featured": false,
-      "priority": 0,
-      "cover": "assets/images/cover-events.svg"
+      "priority": 0
     }
   ]
 }

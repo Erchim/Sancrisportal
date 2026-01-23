@@ -1,501 +1,136 @@
-(function () {
-  const App = {};
-  const $ = (id) => document.getElementById(id);
+(function(){const App={};const $=(id)=>document.getElementById(id);
+async function fetchJson(url){const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error(url);return r.json();}
+async function fetchText(url){const r=await fetch(url,{cache:"no-store"});if(!r.ok)return"";return r.text();}
+const norm=(s)=>String(s||"").toLowerCase().replace(/\s+/g," ").trim();
+const esc=(s)=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function setActiveNav(){const p=location.pathname.split("/").pop()||"index.html";document.querySelectorAll(".nav a").forEach(a=>{if(a.getAttribute("href")===p)a.classList.add("active");});}
+function setYear(){const y=$("year");if(y)y.textContent=String(new Date().getFullYear());}
 
-  async function fetchJson(url) {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Failed to load: ${url}`);
-    return await res.json();
+function initMenu(){
+  const btn = document.getElementById("menuBtn");
+  const nav = document.getElementById("siteNav");
+  if(!btn || !nav) return;
+
+  function close(){
+    nav.classList.remove("open");
+    btn.setAttribute("aria-expanded","false");
   }
-  async function fetchText(url) {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) return "";
-    return await res.text();
+  function open(){
+    nav.classList.add("open");
+    btn.setAttribute("aria-expanded","true");
   }
+  btn.addEventListener("click", (e)=>{
+    e.preventDefault();
+    const isOpen = nav.classList.contains("open");
+    if(isOpen) close(); else open();
+  });
 
-  function normalize(str) {
-    return (str || "").toLowerCase().replace(/\s+/g, " ").trim();
-  }
-  function escapeHtml(str) {
-    return String(str ?? "").replace(/[&<>"']/g, (m) => ({
-      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
-    }[m]));
-  }
+  // close on link click (mobile)
+  nav.querySelectorAll("a").forEach(a=>a.addEventListener("click", ()=>close()));
 
-  function setActiveNav() {
-    const path = location.pathname.split("/").pop() || "index.html";
-    document.querySelectorAll(".nav a").forEach(a => {
-      const href = a.getAttribute("href");
-      if (href === path) a.classList.add("active");
-    });
-  }
-  function setYear() {
-    const el = $("year");
-    if (el) el.textContent = String(new Date().getFullYear());
-  }
+  // close on outside click
+  document.addEventListener("click", (e)=>{
+    if(!nav.classList.contains("open")) return;
+    if(nav.contains(e.target) || btn.contains(e.target)) return;
+    close();
+  });
 
-  async function loadSiteSettings() {
-    try { return await fetchJson("data/site.json"); }
-    catch { return {}; }
-  }
-  function applyBranding(site) {
-    const titleEls = document.querySelectorAll("[data-site-title]");
-    titleEls.forEach(el => el.textContent = site.short_title || site.site_title || "Portal");
-    const subEls = document.querySelectorAll("[data-site-sub]");
-    subEls.forEach(el => el.textContent = site.description ? site.description : "Guides • Events • Tips");
-    if (site.site_title) document.title = document.title.replace("{{SITE_TITLE}}", site.site_title);
-  }
+  // close on ESC
+  document.addEventListener("keydown",(e)=>{
+    if(e.key==="Escape") close();
+  });
+}
 
-  // Search index
-  const Search = {
-    ready: false,
-    items: [],
-    async build() {
-      if (this.ready) return;
-      const [articles, places, faq, hotels, restaurants, music, events] = await Promise.all([
-        fetchJson("data/articles.json"),
-        fetchJson("data/places.json"),
-        fetchJson("data/faq.json"),
-        fetchJson("data/hotels.json"),
-        fetchJson("data/restaurants.json"),
-        fetchJson("data/music.json"),
-        fetchJson("data/events.json"),
-      ]);
+async function site(){try{return await fetchJson("data/site.json");}catch{return{};}}
+function applyBrand(s){document.querySelectorAll("[data-site-title]").forEach(el=>el.textContent=s.short_title||s.site_title||"Portal");
+document.querySelectorAll("[data-site-sub]").forEach(el=>el.textContent=(s.tagline||"Events • Guides • Tips"));
+if(s.site_title)document.title=document.title.replace("{{SITE_TITLE}}",s.site_title);}
+const Search={ready:false,items:[],async build(){if(this.ready)return;
+const [A,P,F,H,R,M,E]=await Promise.all([fetchJson("data/articles.json"),fetchJson("data/places.json"),fetchJson("data/faq.json"),fetchJson("data/hotels.json"),fetchJson("data/restaurants.json"),fetchJson("data/music.json"),fetchJson("data/events.json")]);
+const items=[];
+for(const a of (A.articles||[])){const md=await fetchText(`posts/${a.slug}.md`);items.push({type:"Article",title:a.title,url:`post.html?slug=${encodeURIComponent(a.slug)}`,cover:a.cover||"assets/images/cover_default.jpg",text:norm([a.title,a.excerpt,a.description,a.category,(a.tags||[]).join(" "),md].join(" ")),featured:!!a.featured,priority:+(a.priority||0),snippet:a.excerpt||""});}
+for(const p of (P.places||[])){const md=await fetchText(`posts/${p.slug}.md`);items.push({type:"Place",title:p.title,url:`post.html?slug=${encodeURIComponent(p.slug)}`,cover:p.cover||"assets/images/cover_default.jpg",text:norm([p.title,p.excerpt,p.description,p.distance,p.category,(p.tags||[]).join(" "),md].join(" ")),featured:!!p.featured,priority:+(p.priority||0),snippet:p.excerpt||""});}
+for(const f of (F.faq||[])){items.push({type:"FAQ",title:f.q,url:`faq.html#${encodeURIComponent(f.id||"")}`,cover:"assets/images/cover_default.jpg",text:norm([f.q,f.a,(f.tags||[]).join(" ")].join(" ")),featured:!!f.featured,priority:+(f.priority||0),snippet:(f.a||"").slice(0,140)});}
+for(const h of (H.hotels||[])){items.push({type:"Hotel",title:h.name,url:`item.html?type=hotels&id=${encodeURIComponent(h.id||"")}`,cover:h.cover||"assets/images/cover_default.jpg",text:norm([h.name,h.type,h.price,h.area,h.description,h.address,(h.tags||[]).join(" ")].join(" ")),featured:!!h.featured,priority:+(h.priority||0),snippet:h.description||""});}
+for(const r of (R.restaurants||[])){items.push({type:"Restaurant",title:r.name,url:`item.html?type=restaurants&id=${encodeURIComponent(r.id||"")}`,cover:r.cover||"assets/images/cover_default.jpg",text:norm([r.name,r.type,r.price,r.area,r.description,r.address,(r.tags||[]).join(" ")].join(" ")),featured:!!r.featured,priority:+(r.priority||0),snippet:r.description||""});}
+for(const m of (M.music||[])){items.push({type:"Music",title:m.place,url:`item.html?type=music&id=${encodeURIComponent(m.id||"")}`,cover:m.cover||"assets/images/cover_default.jpg",text:norm([m.place,m.genre,m.description,m.address,(m.tags||[]).join(" ")].join(" ")),featured:!!m.featured,priority:+(m.priority||0),snippet:m.description||""});}
+for(const e of (E.events||[])){items.push({type:"Event",title:e.title,url:`event.html?id=${encodeURIComponent(e.id)}`,cover:e.cover||"assets/images/cover_default.jpg",text:norm([e.title,e.description,e.category,e.venue,e.address,e.date,e.time,(e.tags||[]).join(" ")].join(" ")),featured:!!e.featured,priority:+(e.priority||0),snippet:`${e.date} • ${e.time||"TBA"} • ${e.venue||""}`});}
+items.sort((a,b)=>(b.featured-a.featured)||(b.priority-a.priority)||a.title.localeCompare(b.title));
+this.items=items;this.ready=true;},
+query(q,limit=30){const qq=norm(q);if(!qq)return[];const parts=qq.split(" ").filter(Boolean);const scored=[];
+for(const it of this.items){let s=0;for(const p of parts){if(it.text.includes(p))s+=2;if(norm(it.title).includes(p))s+=3;}if(it.featured)s+=1;s+=Math.min(2,(it.priority||0)/10);if(s>0)scored.push({it,score:s});}
+scored.sort((a,b)=>b.score-a.score);return scored.slice(0,limit).map(x=>x.it);},
+featured(limit=10){return this.items.filter(x=>x.featured).slice(0,limit);} };
+function renderResults(c,rs){c.innerHTML="";if(!rs.length){c.innerHTML=`<div class="muted small" style="padding:12px;">No results.</div>`;return;}
+for(const r of rs){const el=document.createElement("div");el.className="result";el.innerHTML=`<div class="type">${esc(r.type)}</div><div class="title"><a href="${esc(r.url)}">${esc(r.title)}</a></div><div class="snippet">${esc(r.snippet||"")}</div>`;c.appendChild(el);}}
+function bindSearch(input,btn,fn){if(!input)return;const run=()=>fn(input.value||"");input.addEventListener("input",run);
+input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();run();}});if(btn)btn.addEventListener("click",e=>{e.preventDefault();run();});}
+App.initSite=async function(){setActiveNav();setYear();initMenu();const s=await site();applyBrand(s);const ig=$("igLink");if(ig&&s.instagram_url)ig.href=s.instagram_url;};
+App.initHome=async function(){await App.initSite();const s=await site();await Search.build();
+const ig=$("igBtn");if(ig&&s.instagram_url)ig.href=s.instagram_url;const c=$("communityLink");if(c&&s.telegram_url)c.href=s.telegram_url;
+const f=$("featuredList");if(f)renderResults(f,Search.featured(10));const input=$("globalSearch");const out=$("globalResults");
+bindSearch(input,null,()=>renderResults(out,Search.query(input.value,30)));};
+App.initListPage=async function({dataset,searchInputId,searchBtnId,listId,renderItem}){await App.initSite();const data=await fetchJson(dataset);const items=(Object.values(data)[0]||[]).slice();
+const input=$(searchInputId);const btn=searchBtnId?$(searchBtnId):null;const list=$(listId);
+function apply(q){const qq=norm(q);const filtered=!qq?items:items.filter(it=>{const hay=norm(JSON.stringify(it));return qq.split(" ").filter(Boolean).every(p=>hay.includes(p));});
+list.innerHTML="";for(const it of filtered)list.appendChild(renderItem(it));if(!filtered.length)list.innerHTML=`<div class="muted small" style="padding:12px;">No results.</div>`;}
+bindSearch(input,btn,apply);apply("");};
+App.initFAQ=async function(){await App.initSite();const data=await fetchJson("data/faq.json");const items=(data.faq||[]).slice();
+const input=$("faqSearch");const btn=$("faqBtn");const list=$("faqList");
+function render(it){const w=document.createElement("div");w.className="item";w.id=it.id||"";
+w.innerHTML=`<div class="cover" style="background-image:url('assets/images/cover_default.jpg')"></div><div><h3 style="margin:0 0 6px 0;">${esc(it.q)}</h3><div class="muted small">${esc(it.a)}</div><div class="badges">${(it.tags||[]).slice(0,4).map(t=>`<span class="badge">${esc(t)}</span>`).join("")}${it.featured?`<span class="badge accent">Featured</span>`:""}</div></div><div style="display:grid;place-items:center;"><span class="muted small">—</span></div>`;return w;}
+function apply(q){const qq=norm(q);const filtered=!qq?items:items.filter(it=>{const hay=norm([it.q,it.a,(it.tags||[]).join(" ")].join(" "));return qq.split(" ").filter(Boolean).every(p=>hay.includes(p));});
+list.innerHTML="";for(const it of filtered)list.appendChild(render(it));if(!filtered.length)list.innerHTML=`<div class="muted small" style="padding:12px;">No results.</div>`;}
+bindSearch(input,btn,apply);apply("");};
+async function renderMd(url){const md=await fetchText(url);if(!md)return{html:"",title:"Not found"};const html=(window.marked?window.marked.parse(md):`<pre>${esc(md)}</pre>`);const tmp=document.createElement("div");tmp.innerHTML=html;const h1=tmp.querySelector("h1");return{html,title:h1?h1.textContent:"Post"};}
+App.initPost=async function(){await App.initSite();const params=new URLSearchParams(location.search);const slug=params.get("slug")||"welcome";
+const [A,P]=await Promise.all([fetchJson("data/articles.json").catch(()=>({articles:[]})),fetchJson("data/places.json").catch(()=>({places:[]}))]);
+const meta=[...(A.articles||[]),...(P.places||[])].find(x=>x.slug===slug);
+const cover=(meta&&meta.cover)?meta.cover:"assets/images/cover_default.jpg";const desc=(meta&&meta.description)?meta.description:"";const tmeta=(meta&&meta.title)?meta.title:"";
+const hero=$("detailHeroImg");const t=$("detailTitle");const d=$("detailDesc");const b=$("detailBody");
+if(hero)hero.style.backgroundImage=`url('${cover}')`;const out=await renderMd(`posts/${slug}.md`);
+if(t)t.textContent=tmeta||out.title;if(d)d.textContent=desc;if(b)b.innerHTML=out.html;document.title=`${tmeta||out.title} — ${document.title}`;};
+App.initItem=async function(){await App.initSite();const params=new URLSearchParams(location.search);const type=params.get("type");const id=params.get("id");const box=$("itemBox");
+const map={restaurants:{file:"data/restaurants.json",key:"restaurants",title:"Restaurants"},hotels:{file:"data/hotels.json",key:"hotels",title:"Hotels"},music:{file:"data/music.json",key:"music",title:"Music"}};
+const spec=map[type];if(!spec||!id){box.innerHTML=`<div class="detail-wrap"><h1>Not found</h1><p class="muted">Missing type or id.</p></div>`;return;}
+const data=await fetchJson(spec.file);const list=data[spec.key]||[];const it=list.find(x=>String(x.id)===String(id));
+if(!it){box.innerHTML=`<div class="detail-wrap"><h1>Not found</h1><p class="muted">Wrong id.</p></div>`;return;}
+const cover=it.cover||"assets/images/cover_default.jpg";const title=it.name||it.place||"Item";const desc=it.description||"";
+const tags=(it.tags||[]).slice(0,8).map(t=>`<span class="badge">${esc(t)}</span>`).join("");
+const meta=[];if(it.type)meta.push(`🏷️ ${esc(it.type)}`);if(it.genre)meta.push(`🎶 ${esc(it.genre)}`);if(it.price)meta.push(`💰 ${esc(it.price)}`);if(it.area)meta.push(`📍 ${esc(it.area)}`);
+const details=[];
+function add(label,val){if(val===undefined||val===null||String(val).trim()==="")return;details.push([label,String(val)]);}
+if(type==="restaurants"){add("Cuisine / style", it.type);add("Price", it.price);add("Area", it.area);add("Address", it.address);add("Hours", it.hours);add("Phone", it.phone);add("Instagram", it.instagram);}
+if(type==="hotels"){add("Price range", it.price_range||it.price);add("Vibe", it.vibe);add("Area", it.area);add("Address", it.address);add("WhatsApp", it.whatsapp);add("Phone", it.phone);add("Booking", it.booking_url);add("Website", it.link);}
+if(type==="music"){add("Type", it.type);add("Best day", it.best_day);add("Genre", it.genre);add("Area", it.area);add("Address", it.address);add("Hours", it.hours);add("Cover", it.cover_charge);add("Instagram", it.instagram);}
+const detailsHtml=details.length?`<div class="card" style="margin-top:14px;"><h2 style="margin:0 0 10px 0;font-size:1.1rem;">Details</h2><div class="kv">${details.map(([k,v])=>`<div class="kv-row"><div class="kv-k">${esc(k)}</div><div class="kv-v">${esc(v)}</div></div>`).join("")}</div></div>`:"";
 
-      const items = [];
-
-      for (const a of (articles.articles || [])) {
-        const mdUrl = `posts/${a.slug}.md`;
-        const md = await fetchText(mdUrl);
-        items.push({
-          type: "Article",
-          title: a.title,
-          url: `post.html?slug=${encodeURIComponent(a.slug)}`,
-          text: normalize([a.title, a.excerpt, a.category, (a.tags || []).join(" "), md].join(" ")),
-          featured: !!a.featured,
-          priority: Number(a.priority || 0),
-          snippet: a.excerpt || ""
-        });
-      }
-
-      for (const p of (places.places || [])) {
-        const mdUrl = `posts/${p.slug}.md`;
-        const md = await fetchText(mdUrl);
-        items.push({
-          type: "Place",
-          title: p.title,
-          url: `post.html?slug=${encodeURIComponent(p.slug)}`,
-          text: normalize([p.title, p.excerpt, p.distance, p.category, (p.tags || []).join(" "), md].join(" ")),
-          featured: !!p.featured,
-          priority: Number(p.priority || 0),
-          snippet: p.excerpt || ""
-        });
-      }
-
-      for (const f of (faq.faq || [])) {
-        items.push({
-          type: "FAQ",
-          title: f.q,
-          url: `faq.html#${encodeURIComponent(f.id || "")}`,
-          text: normalize([f.q, f.a, (f.tags || []).join(" ")].join(" ")),
-          featured: !!f.featured,
-          priority: Number(f.priority || 0),
-          snippet: (f.a || "").slice(0, 140)
-        });
-      }
-
-      for (const h of (hotels.hotels || [])) {
-        items.push({
-          type: "Hotel",
-          title: h.name,
-          url: `hotels.html#${encodeURIComponent(h.id || "")}`,
-          text: normalize([h.name, h.type, h.price, h.area, (h.tags || []).join(" ")].join(" ")),
-          featured: !!h.featured,
-          priority: Number(h.priority || 0),
-          snippet: `${h.type || "Hotel"} • ${h.area || ""} • ${h.price || ""}`
-        });
-      }
-
-      for (const r of (restaurants.restaurants || [])) {
-        items.push({
-          type: "Restaurant",
-          title: r.name,
-          url: `restaurants.html#${encodeURIComponent(r.id || "")}`,
-          text: normalize([r.name, r.type, r.price, r.area, (r.tags || []).join(" ")].join(" ")),
-          featured: !!r.featured,
-          priority: Number(r.priority || 0),
-          snippet: `${r.type || "Food"} • ${r.area || ""} • ${r.price || ""}`
-        });
-      }
-
-      for (const m of (music.music || [])) {
-        items.push({
-          type: "Music",
-          title: m.place,
-          url: `music.html#${encodeURIComponent(m.id || "")}`,
-          text: normalize([m.place, m.genre, (m.tags || []).join(" ")].join(" ")),
-          featured: !!m.featured,
-          priority: Number(m.priority || 0),
-          snippet: m.genre || ""
-        });
-      }
-
-      for (const e of (events.events || [])) {
-        items.push({
-          type: "Event",
-          title: e.title,
-          url: `event.html?id=${encodeURIComponent(e.id)}`,
-          text: normalize([e.title, e.description, e.category, e.venue, e.address, e.date, e.time, (e.tags || []).join(" ")].join(" ")),
-          featured: !!e.featured,
-          priority: Number(e.priority || 0),
-          snippet: `${e.date} • ${e.time || "TBA"} • ${e.venue || ""}`
-        });
-      }
-
-      items.sort((a, b) => (b.featured - a.featured) || (b.priority - a.priority) || a.title.localeCompare(b.title));
-      this.items = items;
-      this.ready = true;
-    },
-
-    query(q, limit=20) {
-      const qq = normalize(q);
-      if (!qq) return [];
-      const parts = qq.split(" ").filter(Boolean);
-      const scored = [];
-      for (const it of this.items) {
-        let score = 0;
-        for (const p of parts) {
-          if (it.text.includes(p)) score += 2;
-          if (normalize(it.title).includes(p)) score += 3;
-        }
-        if (it.featured) score += 1;
-        score += Math.min(2, (it.priority || 0) / 10);
-        if (score > 0) scored.push({ it, score });
-      }
-      scored.sort((a, b) => b.score - a.score);
-      return scored.slice(0, limit).map(x => x.it);
-    },
-
-    featured(limit=8) {
-      return this.items.filter(x => x.featured).slice(0, limit);
-    }
-  };
-
-  function renderSearchResults(container, results) {
-    container.innerHTML = "";
-    if (!results.length) {
-      container.innerHTML = `<div class="muted small" style="padding:12px;">No results.</div>`;
-      return;
-    }
-    for (const r of results) {
-      const el = document.createElement("div");
-      el.className = "result";
-      el.innerHTML = `
-        <div class="type">${escapeHtml(r.type)}</div>
-        <div class="title"><a href="${escapeHtml(r.url)}">${escapeHtml(r.title)}</a></div>
-        <div class="snippet">${escapeHtml(r.snippet || "")}</div>
-      `;
-      container.appendChild(el);
-    }
-  }
-
-  // Markdown renderer
-  async function renderMarkdownInto(containerEl, mdUrl) {
-    const md = await fetchText(mdUrl);
-    if (!md) {
-      containerEl.innerHTML = `<h1>Not found</h1><p class="muted">Missing file: <code>${escapeHtml(mdUrl)}</code></p>`;
-      return { title: "Not found", md: "" };
-    }
-    const html = (window.marked ? window.marked.parse(md) : `<pre>${escapeHtml(md)}</pre>`);
-    containerEl.innerHTML = html;
-    const h1 = containerEl.querySelector("h1");
-    return { title: h1 ? h1.textContent : "Post", md };
-  }
-
-  // Public inits
-  App.initSite = async function () {
-    setActiveNav();
-    setYear();
-    const site = await loadSiteSettings();
-    applyBranding(site);
-    // footer links
-    const ig = $("igLink"); if (ig && site.instagram_url) ig.href = site.instagram_url;
-  };
-
-  App.initHome = async function () {
-    await App.initSite();
-    const site = await loadSiteSettings();
-    await Search.build();
-
-    const submitLink = $("submitLink");
-    if (submitLink) submitLink.href = "submit.html";
-
-    const joinLink = $("communityLink");
-    if (joinLink && site.telegram_url) joinLink.href = site.telegram_url;
-
-    const featuredBox = $("featuredList");
-    if (featuredBox) renderSearchResults(featuredBox, Search.featured(8));
-
-    const input = $("globalSearch");
-    const out = $("globalResults");
-
-    function apply() {
-      const results = Search.query(input.value, 20);
-      renderSearchResults(out, results);
-    }
-    input.addEventListener("input", apply);
-
-    // quick CTA
-    const igBtn = $("igBtn");
-    if (igBtn && site.instagram_url) igBtn.href = site.instagram_url;
-  };
-
-  App.initListPage = async function ({ dataset, searchInputId, listId, renderItem }) {
-    await App.initSite();
-    const data = await fetchJson(dataset);
-    const items = (Object.values(data)[0] || []).slice();
-
-    const input = $(searchInputId);
-    const list = $(listId);
-
-    function apply() {
-      const q = normalize(input.value);
-      const filtered = !q ? items : items.filter(it => {
-        const hay = normalize(JSON.stringify(it));
-        return q.split(" ").filter(Boolean).every(p => hay.includes(p));
-      });
-      list.innerHTML = "";
-      for (const it of filtered) list.appendChild(renderItem(it));
-      if (!filtered.length) list.innerHTML = `<div class="muted small" style="padding:12px;">No results.</div>`;
-    }
-
-    input.addEventListener("input", apply);
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        apply();
-      }
-    });
-    const btn = document.querySelector(`[data-search-btn="${searchInputId}"]`) || $(`${searchInputId}Btn`);
-    if (btn) btn.addEventListener("click", apply);
-    apply();
-  };
-
-  App.initFAQ = async function () {
-    await App.initSite();
-    const data = await fetchJson("data/faq.json");
-    const items = (data.faq || []).slice();
-
-    const input = $("faqSearch");
-    const list = $("faqList");
-
-    function render(it) {
-      const wrap = document.createElement("div");
-      wrap.className = "item with-cover";
-      wrap.id = it.id || "";
-      wrap.innerHTML = `
-        <div>
-          <h3 style="margin:0 0 6px 0;">${escapeHtml(it.q)}</h3>
-          <div class="muted small">${escapeHtml(it.a)}</div>
-          <div class="badges">
-            ${(it.tags || []).slice(0, 4).map(t => `<span class="badge">${escapeHtml(t)}</span>`).join("")}
-            ${it.featured ? `<span class="badge accent">Featured</span>` : ""}
-          </div>
-        </div>
-      `;
-      return wrap;
-    }
-
-    function apply() {
-      const q = normalize(input.value);
-      const filtered = !q ? items : items.filter(it => {
-        const hay = normalize([it.q, it.a, (it.tags || []).join(" ")].join(" "));
-        return q.split(" ").filter(Boolean).every(p => hay.includes(p));
-      });
-      list.innerHTML = "";
-      for (const it of filtered) list.appendChild(render(it));
-      if (!filtered.length) list.innerHTML = `<div class="muted small" style="padding:12px;">No results.</div>`;
-    }
-
-    input.addEventListener("input", apply);
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        apply();
-      }
-    });
-    const btn = document.querySelector(`[data-search-btn="${searchInputId}"]`) || $(`${searchInputId}Btn`);
-    if (btn) btn.addEventListener("click", apply);
-    apply();
-  };
-
-  App.initPost = async function () {
-    await App.initSite();
-    const params = new URLSearchParams(location.search);
-    const slug = params.get("slug") || "welcome";
-    const container = $("postBody");
-    const mdUrl = `posts/${slug}.md`;
-    const { title } = await renderMarkdownInto(container, mdUrl);
-    document.title = `${title} — ${document.title}`;
-  };
-
-  // Events (same as before)
-  function parseISODate(dateStr) {
-    const [y, m, d] = dateStr.split("-").map(Number);
-    const dt = new Date(y, (m - 1), d);
-    dt.setHours(0, 0, 0, 0);
-    return dt;
-  }
-  function fmtDate(dateStr) {
-    const dt = parseISODate(dateStr);
-    return dt.toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" });
-  }
-  function isPaid(e) {
-    if (e.price === 0) return false;
-    if (typeof e.price === "string" && normalize(e.price) === "free") return false;
-    return true;
-  }
-  function matchesPriceFilter(e, priceFilter) {
-    if (!priceFilter) return true;
-    if (priceFilter === "free") return !isPaid(e);
-    if (priceFilter === "paid") return isPaid(e);
-    return true;
-  }
-  function matchesQueryEvent(e, q) {
-    if (!q) return true;
-    const hay = [e.title, e.description, e.venue, e.address, e.category, (e.tags || []).join(" ")].join(" ");
-    return normalize(hay).includes(normalize(q));
-  }
-  function eventCard(e) {
-    const wrap = document.createElement("div");
-    wrap.className = "item";
-    const cover = document.createElement("div");
-    cover.className = "cover";
-    cover.innerHTML = `<img src="${escapeHtml(e.cover || "assets/images/cover-events.svg")}" alt="" />`;
-    const left = document.createElement("div");
-    const right = document.createElement("div");
-    right.style.display = "grid";
-    right.style.placeItems = "center";
-
-    left.innerHTML = `
-      <h3>${escapeHtml(e.title)}</h3>
-      <div class="meta">
-        <span>🗓️ ${escapeHtml(fmtDate(e.date))}</span>
-        <span>🕒 ${escapeHtml(e.time || "TBA")}</span>
-        <span>📍 ${escapeHtml(e.venue || "TBA")}</span>
-      </div>
-      <div class="badges">
-        <span class="badge accent">${escapeHtml(e.category || "General")}</span>
-        <span class="badge purple">${escapeHtml(!isPaid(e) ? "Free" : (typeof e.price === "number" ? `$${e.price} MXN` : "Paid"))}</span>
-        ${(e.tags || []).slice(0, 3).map(t => `<span class="badge">${escapeHtml(t)}</span>`).join("")}
-        ${e.featured ? `<span class="badge accent">Featured</span>` : ""}
-      </div>
-      ${e.description ? `<div class="muted small" style="margin-top:8px;">${escapeHtml(e.description.length > 160 ? e.description.slice(0, 160) + "…" : e.description)}</div>` : ""}
-    `;
-    right.innerHTML = `<a class="btn" href="event.html?id=${encodeURIComponent(e.id)}">Details</a>`;
-    wrap.appendChild(cover);
-    wrap.appendChild(left);
-    wrap.appendChild(right);
-    return wrap;
-  }
-  function renderEventList(container, events) {
-    container.innerHTML = "";
-    if (!events.length) {
-      container.innerHTML = `<div class="muted small" style="padding:12px;">No events found for selected filters.</div>`;
-      return;
-    }
-    for (const e of events) container.appendChild(eventCard(e));
-  }
-
-  App.initEventsPage = async function () {
-    await App.initSite();
-    const data = await fetchJson("data/events.json");
-    const eventsAll = (data.events || []).slice().sort((a, b) => (a.date > b.date ? 1 : -1));
-
-    const q = $("q");
-    const from = $("from");
-    const to = $("to");
-    const category = $("category");
-    const price = $("price");
-    const out = $("eventsAll");
-
-    const cats = Array.from(new Set(eventsAll.map(e => e.category).filter(Boolean))).sort();
-    for (const c of cats) {
-      const opt = document.createElement("option");
-      opt.value = c;
-      opt.textContent = c;
-      category.appendChild(opt);
-    }
-
-    function inRange(e) {
-      const ev = parseISODate(e.date);
-      if (from && from.value) {
-        const f = parseISODate(from.value);
-        if (ev < f) return false;
-      }
-      if (to && to.value) {
-        const t = parseISODate(to.value);
-        if (ev > t) return false;
-      }
-      return true;
-    }
-
-    function apply() {
-      const qq = q ? q.value : "";
-      const cat = category ? category.value : "";
-      const p = price ? price.value : "";
-
-      const filtered = eventsAll.filter(e =>
-        inRange(e) &&
-        (!cat || e.category === cat) &&
-        matchesPriceFilter(e, p) &&
-        matchesQueryEvent(e, qq)
-      );
-      renderEventList(out, filtered);
-    }
-
-    [q, from, to, category, price].forEach(el => {
-      if (!el) return;
-      el.addEventListener("input", apply);
-      el.addEventListener("change", apply);
-    });
-
-    apply();
-  };
-
-  App.initEventDetails = async function () {
-    await App.initSite();
-    const params = new URLSearchParams(location.search);
-    const id = params.get("id");
-    const data = await fetchJson("data/events.json");
-    const e = (data.events || []).find(x => String(x.id) === String(id));
-    const box = $("eventDetails");
-    if (!box) return;
-    if (!e) {
-      box.innerHTML = `<h1>Event not found</h1><p class="muted">Wrong or missing event id.</p>`;
-      return;
-    }
-    const priceText = (!isPaid(e)) ? "Free" : (typeof e.price === "number" ? `$${e.price} MXN` : "Paid");
-    box.innerHTML = `
-      <h1 style="margin:0;">${escapeHtml(e.title)}</h1>
-      <div class="meta">
-        <span>🗓️ ${escapeHtml(fmtDate(e.date))}</span>
-        <span>🕒 ${escapeHtml(e.time || "TBA")}</span>
-        <span>🏷️ ${escapeHtml(e.category || "General")}</span>
-      </div>
-      <div class="badges">
-        <span class="badge accent">📍 ${escapeHtml(e.venue || "TBA")}</span>
-        <span class="badge">🧭 ${escapeHtml(e.address || "Address not provided")}</span>
-        <span class="badge purple">💰 ${escapeHtml(priceText)}</span>
-        ${e.featured ? `<span class="badge accent">Featured</span>` : ""}
-      </div>
-      ${e.description ? `<div class="muted" style="margin-top:10px;">${escapeHtml(e.description).replace(/\\n/g, "<br/>")}</div>` : ""}
-      <div class="filters" style="margin-top:12px;">
-        ${e.contact ? `<div class="muted small">Contact: ${escapeHtml(e.contact)}</div>` : ""}
-        ${e.source_url ? `<a class="btn ghost" href="${escapeHtml(e.source_url)}" target="_blank" rel="noreferrer">Source / flyer</a>` : ""}
-      </div>
-    `;
-  };
-
-  window.App = App;
-})();
+const links=[];if(it.link)links.push(`<a class="btn" target="_blank" rel="noreferrer" href="${esc(it.link)}">Open link</a>`);if(it.map_url)links.push(`<a class="btn ghost" target="_blank" rel="noreferrer" href="${esc(it.map_url)}">Open map</a>`);
+box.innerHTML=`<div class="detail-wrap"><img class="detail-photo" src="${esc(cover)}" alt="Cover" /><h1 class="detail-title">${esc(title)}</h1>${desc?`<p class="detail-desc">${esc(desc)}</p>`:""}<div class="meta">${meta.join(" • ")}</div><div class="badges" style="margin-top:10px;">${tags}${it.featured?`<span class="badge accent">Featured</span>`:""}</div>${detailsHtml}${it.address?`<div class="filters" style="margin-top:12px;"><span class="badge accent">🧭 ${esc(it.address)}</span></div>`:""}<div class="filters" style="margin-top:14px;">${links.join(" ")||""}<a class="btn ghost" href="${esc(type)}.html">Back to ${esc(spec.title)}</a></div></div>`;
+document.title=`${title} — ${document.title}`;};
+function parseISO(s){const [y,m,d]=s.split("-").map(Number);const dt=new Date(y,(m-1),d);dt.setHours(0,0,0,0);return dt;}
+function fmtDate(s){const dt=parseISO(s);return dt.toLocaleDateString(undefined,{weekday:"short",year:"numeric",month:"short",day:"numeric"});}
+function isPaid(e){if(e.price===0)return false;if(typeof e.price==="string"&&norm(e.price)==="free")return false;return true;}
+function matchesPrice(e,f){if(!f)return true;if(f==="free")return !isPaid(e);if(f==="paid")return isPaid(e);return true;}
+function matchesQ(e,q){if(!q)return true;const hay=[e.title,e.description,e.venue,e.address,e.category,(e.tags||[]).join(" ")].join(" ");return norm(hay).includes(norm(q));}
+function eventCard(e){const w=document.createElement("div");w.className="item";const cover=e.cover||"assets/images/cover_default.jpg";
+w.innerHTML=`<div class="cover" style="background-image:url('${cover}')"></div><div><h3>${esc(e.title)}</h3><div class="meta"><span>🗓️ ${esc(fmtDate(e.date))}</span><span>🕒 ${esc(e.time||"TBA")}</span><span>📍 ${esc(e.venue||"TBA")}</span></div><div class="badges"><span class="badge accent">${esc(e.category||"General")}</span><span class="badge purple">${esc(!isPaid(e)?"Free":(typeof e.price==="number"?`$${e.price} MXN`:"Paid"))}</span>${(e.tags||[]).slice(0,3).map(t=>`<span class="badge">${esc(t)}</span>`).join("")}${e.featured?`<span class="badge accent">Featured</span>`:""}</div>${e.description?`<div class="muted small" style="margin-top:8px;">${esc(e.description.length>160?e.description.slice(0,160)+"…":e.description)}</div>`:""}</div><div style="display:grid;place-items:center;"><a class="btn" href="event.html?id=${encodeURIComponent(e.id)}">Details</a></div>`;
+return w;}
+function renderEvents(c,arr){c.innerHTML="";if(!arr.length){c.innerHTML=`<div class="muted small" style="padding:12px;">No events found for selected filters.</div>`;return;}for(const e of arr)c.appendChild(eventCard(e));}
+App.initEventsPage=async function(){await App.initSite();const data=await fetchJson("data/events.json");const all=(data.events||[]).slice().sort((a,b)=>a.date>b.date?1:-1);
+const q=$("q"),from=$("from"),to=$("to"),cat=$("category"),price=$("price"),out=$("eventsAll");
+[...new Set(all.map(e=>e.category).filter(Boolean))].sort().forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;cat.appendChild(o);});
+function inRange(e){const ev=parseISO(e.date);if(from&&from.value&&ev<parseISO(from.value))return false;if(to&&to.value&&ev>parseISO(to.value))return false;return true;}
+function apply(){const qq=q?q.value:"";const cc=cat?cat.value:"";const pp=price?price.value:"";const filtered=all.filter(e=>inRange(e)&&(!cc||e.category===cc)&&matchesPrice(e,pp)&&matchesQ(e,qq));renderEvents(out,filtered);}
+[q,from,to,cat,price].forEach(el=>{if(!el)return;el.addEventListener("input",apply);el.addEventListener("change",apply);el.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();apply();}});});apply();};
+App.initEventDetails=async function(){await App.initSite();const params=new URLSearchParams(location.search);const id=params.get("id");const data=await fetchJson("data/events.json");
+const e=(data.events||[]).find(x=>String(x.id)===String(id));const hero=$("detailHero"),t=$("detailTitle"),d=$("detailDesc"),b=$("detailBody");
+if(!e){t.textContent="Event not found";d.textContent="Wrong or missing event id.";return;}
+const cover=e.cover||"assets/images/cover_default.jpg";if(hero)hero.style.backgroundImage=`url('${cover}')`;t.textContent=e.title;d.textContent=e.description||"";
+const priceText=!isPaid(e)?"Free":(typeof e.price==="number"?`$${e.price} MXN`:"Paid");
+b.innerHTML=`<div class="meta" style="margin-top:6px;"><span>🗓️ ${esc(fmtDate(e.date))}</span><span>🕒 ${esc(e.time||"TBA")}</span><span>🏷️ ${esc(e.category||"General")}</span></div>
+<div class="badges" style="margin-top:10px;"><span class="badge accent">📍 ${esc(e.venue||"TBA")}</span><span class="badge">🧭 ${esc(e.address||"Address not provided")}</span><span class="badge purple">💰 ${esc(priceText)}</span>${(e.tags||[]).slice(0,6).map(t=>`<span class="badge">${esc(t)}</span>`).join("")}${e.featured?`<span class="badge accent">Featured</span>`:""}</div>
+${e.contact?`<div class="filters" style="margin-top:14px;"><span class="badge accent">Contact: ${esc(e.contact)}</span></div>`:""}
+<div class="filters" style="margin-top:14px;">${e.source_url?`<a class="btn" target="_blank" rel="noreferrer" href="${esc(e.source_url)}">Source / flyer</a>`:""}<a class="btn ghost" href="events.html">Back to Events</a></div>`;
+document.title=`${e.title} — ${document.title}`;};
+window.App=App;})();

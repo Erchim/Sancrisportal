@@ -11,10 +11,10 @@
         "family"
       ],
       "excerpt": "Caves + riverside park for an easy half‑day trip.",
+      "description": "A classic nearby spot with caves, walking paths and river sounds — easy half‑day plan.",
+      "cover": "assets/images/cover_arcotete.jpg",
       "featured": true,
-      "priority": 8,
-      "cover": "assets/images/cover-nature.svg",
-      "description": "Caves + riverside park for an easy half‑day trip."
+      "priority": 8
     },
     {
       "slug": "cenote-chukumaltik",
@@ -27,10 +27,10 @@
         "cenote"
       ],
       "excerpt": "Crystal water cenote — perfect for a day trip.",
+      "description": "Beautiful cenote with clear water. Go early on weekends.",
+      "cover": "assets/images/cover_default.jpg",
       "featured": false,
-      "priority": 0,
-      "cover": "assets/images/cover-nature.svg",
-      "description": "Crystal water cenote — perfect for a day trip."
+      "priority": 0
     }
   ]
 }

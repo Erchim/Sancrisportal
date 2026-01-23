@@ -4,11 +4,13 @@
   <title>Post — {{SITE_TITLE}}</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="assets/style.css" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0b0c10" />
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="assets/style.css?v=6.0" />
+  <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
+  <meta name="robots" content="index,follow" />
+
 </head>
 <body>
 <header class="container header">
@@ -19,7 +21,11 @@
       <div class="brand-sub" data-site-sub>Local guides • Events • Tips</div>
     </div>
   </div>
-  <nav class="nav">
+  <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">
+    <span class="menu-icon" aria-hidden="true"><i></i></span>
+    <span class="menu-label">Menu</span>
+  </button>
+  <nav class="nav" id="siteNav">
     <a href="index.html">Home</a>
     <a href="articles.html">Life</a>
     <a href="nature.html">Nature</a>
@@ -33,70 +39,24 @@
 </header>
 
 <main class="container">
-  <section class="hero-card">
-    <div class="hero-media"><img id="heroImg" alt="" /></div>
-    <div class="hero-body">
-      <h1 id="heroTitle">Loading…</h1>
-      <p class="lead" id="heroDesc"></p>
-      <div class="meta" id="heroMeta"></div>
+  <section class="card">
+    <div class="detail-wrap">
+      <img id="detailHeroImg" class="detail-photo" src="assets/images/cover_default.jpg" alt="Cover" />
+      <h1 id="detailTitle" class="detail-title">Post</h1>
+      <p id="detailDesc" class="detail-desc"></p>
     </div>
+    <div id="detailBody" class="prose-body"></div>
+    <div class="card-foot"><a href="index.html">← Back home</a></div>
   </section>
-
-  <article class="card prose" style="margin-top:16px;">
-    <div id="postBody"></div>
-    <div class="card-foot"><a href="javascript:history.back()">← Back</a></div>
-  </article>
 </main>
 
 <footer class="container footer">
   <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
-<script src="assets/app.js"></script>
-<script>
-  (async () => {
-    await App.initSite();
-    const params = new URLSearchParams(location.search);
-    const slug = params.get("slug") || "welcome";
+<script src="assets/app.js?v=6.0"></script>
 
-    const [aData, pData] = await Promise.all([
-      fetch("data/articles.json", {cache:"no-store"}).then(r=>r.json()).catch(()=>({articles:[]})),
-      fetch("data/places.json", {cache:"no-store"}).then(r=>r.json()).catch(()=>({places:[]})),
-    ]);
-    const metaItem = (aData.articles||[]).find(x=>x.slug===slug) || (pData.places||[]).find(x=>x.slug===slug) || null;
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>App.initPost();</script>
 
-    const heroImg = document.getElementById("heroImg");
-    const heroTitle = document.getElementById("heroTitle");
-    const heroDesc = document.getElementById("heroDesc");
-    const heroMeta = document.getElementById("heroMeta");
-
-    heroImg.src = (metaItem && metaItem.cover) ? metaItem.cover : "assets/images/cover-post.svg";
-    heroImg.alt = metaItem ? (metaItem.title || "") : "";
-
-    if (metaItem) {
-      heroTitle.textContent = metaItem.title || "Post";
-      heroDesc.textContent = metaItem.description || metaItem.excerpt || "";
-      const bits = [];
-      if (metaItem.date) bits.push(`🗓️ ${metaItem.date}`);
-      if (metaItem.category) bits.push(`🏷️ ${metaItem.category}`);
-      heroMeta.innerHTML = bits.map(b => `<span class="badge accent">${b}</span>`).join(" ");
-    }
-
-    const mdUrl = `posts/${slug}.md`;
-    const res = await fetch(mdUrl, {cache:"no-store"});
-    const container = document.getElementById("postBody");
-    if (!res.ok) {
-      heroTitle.textContent = "Not found";
-      heroDesc.textContent = `Missing file: ${mdUrl}`;
-      container.innerHTML = `<p class="muted">Post not found.</p>`;
-      return;
-    }
-    const md = await res.text();
-    container.innerHTML = window.marked ? window.marked.parse(md) : `<pre>${md}</pre>`;
-    const h1 = container.querySelector("h1");
-    if (h1) h1.remove();
-
-    document.title = `${heroTitle.textContent} — ${document.title}`;
-  })();
-</script>
 </body>
 </html>

@@ -1,9 +1,13 @@
 # Welcome: How this portal works
 
-This is a lightweight portal for **San Cristóbal de las Casas**.
+This portal is designed to be **simple and fast**.
 
-- Browse **events**
-- Read **guides** (Markdown)
-- Explore **nature trips**
+## What you can do here
+- Browse **Events**
+- Read **Life** guides
+- Explore **Nature** day trips
+- Check **Hotels / Food / Music**
+- Use **FAQ** for practical questions
 
-Use the **Submit** page to send events/tips.
+## How to submit
+Go to **Submit** in the menu, send your info, and it gets published.
