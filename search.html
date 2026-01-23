@@ -1,18 +1,15 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <title>Event — {{SITE_TITLE}}</title>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0b0c10" />
-  <link rel="stylesheet" href="assets/style.css?v=8.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-site-title>Events San Cristobal</title>
   <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
-  <meta name="robots" content="index,follow" />
-
+  <link rel="stylesheet" href="assets/style.css?v=8.0" />
+  <link rel="icon" href="assets/favicon.svg" />
 </head>
 <body>
+
 <header class="container header">
   <a class="brand" href="index.html" aria-label="Home">
     <div class="logo">SC</div>
@@ -53,21 +50,25 @@
 
 <main class="container">
   <section class="card">
-    <div class="detail-wrap">
-      <div id="detailHero" class="hero-img" style="background-image:url('assets/images/cover_default.jpg')"></div>
-      <h1 id="detailTitle" class="detail-title">Event</h1>
-      <p id="detailDesc" class="detail-desc"></p>
-      <div id="detailBody" class="prose-body"></div>
+    <div class="card-head">
+      <h1 style="margin:0">Search</h1>
+      <p class="muted" id="queryLabel">Search the portal</p>
     </div>
+
+    <form id="searchPageForm" class="search-page">
+      <input id="searchInput" class="input" placeholder="Try: yoga, arcotete, vegan, airport, jazz…" />
+      <button class="btn" type="submit">Search</button>
+    </form>
+
+    <div id="searchResults" class="result-grid"></div>
   </section>
 </main>
 
 <footer class="container footer">
-  <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
+  <div class="muted small">© <span id="year"></span> <span data-site-title>Events San Cristobal</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
+
 <script src="assets/app.js?v=8.0"></script>
-
-<script>App.initEventDetails();</script>
-
+<script>App.initSearchPage();</script>
 </body>
 </html>

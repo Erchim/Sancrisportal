@@ -7,25 +7,38 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0b0c10" />
-  <link rel="stylesheet" href="assets/style.css?v=6.0" />
+  <link rel="stylesheet" href="assets/style.css?v=8.0" />
   <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
   <meta name="robots" content="index,follow" />
 
 </head>
 <body>
 <header class="container header">
-  <div class="brand">
+  <a class="brand" href="index.html" aria-label="Home">
     <div class="logo">SC</div>
     <div>
-      <div class="brand-title" data-site-title>Events.SanCris</div>
-      <div class="brand-sub" data-site-sub>Local guides • Events • Tips</div>
+      <div class="brand-title" data-site-title>Events San Cristobal</div>
+      <div class="brand-sub" data-site-sub>Events • Guides • Tips</div>
     </div>
+  </a>
+
+  <div class="header-actions">
+    <button class="icon-btn" id="searchBtn" aria-label="Search" aria-expanded="false" aria-controls="searchPanel">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="siteNav">
+      <span class="icon-menu" aria-hidden="true"><i></i></span>
+    </button>
   </div>
-  <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">
-    <span class="menu-icon" aria-hidden="true"><i></i></span>
-    <span class="menu-label">Menu</span>
-  </button>
-  <nav class="nav" id="siteNav">
+
+  <div class="search-panel" id="searchPanel">
+    <form class="search-form" id="searchForm" action="search.html" method="GET">
+      <input class="input" id="headerSearchInput" name="q" placeholder="Search…" autocomplete="off" />
+      <button class="btn" type="submit">Search</button>
+    </form>
+  </div>
+
+  <nav class="nav-panel" id="siteNav" aria-label="Site">
     <a href="index.html">Home</a>
     <a href="articles.html">Life</a>
     <a href="nature.html">Nature</a>
@@ -47,7 +60,7 @@
 <footer class="container footer">
   <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
-<script src="assets/app.js?v=6.0"></script>
+<script src="assets/app.js?v=8.0"></script>
 
 <script>App.initItem();</script>
 

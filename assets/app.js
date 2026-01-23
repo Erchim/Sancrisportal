@@ -3,8 +3,9 @@ async function fetchJson(url){const r=await fetch(url,{cache:"no-store"});if(!r.
 async function fetchText(url){const r=await fetch(url,{cache:"no-store"});if(!r.ok)return"";return r.text();}
 const norm=(s)=>String(s||"").toLowerCase().replace(/\s+/g," ").trim();
 const esc=(s)=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-function setActiveNav(){const p=location.pathname.split("/").pop()||"index.html";document.querySelectorAll(".nav a").forEach(a=>{if(a.getAttribute("href")===p)a.classList.add("active");});}
+function setActiveNav(){const p=location.pathname.split("/").pop()||"index.html";document.querySelectorAll(".nav-panel a").forEach(a=>{if(a.getAttribute("href")===p)a.classList.add("active");});}
 function setYear(){const y=$("year");if(y)y.textContent=String(new Date().getFullYear());}
+
 
 function initMenu(){
   const btn = document.getElementById("menuBtn");
@@ -19,27 +20,61 @@ function initMenu(){
     nav.classList.add("open");
     btn.setAttribute("aria-expanded","true");
   }
+
   btn.addEventListener("click", (e)=>{
     e.preventDefault();
-    const isOpen = nav.classList.contains("open");
-    if(isOpen) close(); else open();
+    nav.classList.contains("open") ? close() : open();
   });
 
-  // close on link click (mobile)
   nav.querySelectorAll("a").forEach(a=>a.addEventListener("click", ()=>close()));
 
-  // close on outside click
   document.addEventListener("click", (e)=>{
     if(!nav.classList.contains("open")) return;
     if(nav.contains(e.target) || btn.contains(e.target)) return;
     close();
   });
 
-  // close on ESC
   document.addEventListener("keydown",(e)=>{
     if(e.key==="Escape") close();
   });
 }
+
+function initHeaderSearch(){
+  const btn = document.getElementById("searchBtn");
+  const panel = document.getElementById("searchPanel");
+  const input = document.getElementById("headerSearchInput");
+  if(!btn || !panel || !input) return;
+
+  function close(){
+    panel.classList.remove("open");
+    btn.setAttribute("aria-expanded","false");
+  }
+  function open(){
+    panel.classList.add("open");
+    btn.setAttribute("aria-expanded","true");
+    setTimeout(()=>input.focus(), 50);
+  }
+
+  btn.addEventListener("click",(e)=>{
+    e.preventDefault();
+    panel.classList.contains("open") ? close() : open();
+  });
+
+  // close on outside click
+  document.addEventListener("click",(e)=>{
+    if(!panel.classList.contains("open")) return;
+    if(panel.contains(e.target) || btn.contains(e.target)) return;
+    close();
+  });
+
+  // ESC closes
+  document.addEventListener("keydown",(e)=>{
+    if(e.key==="Escape") close();
+  });
+
+  // If user presses Enter in the input while the panel is open, let the form submit normally
+}
+
 
 async function site(){try{return await fetchJson("data/site.json");}catch{return{};}}
 function applyBrand(s){document.querySelectorAll("[data-site-title]").forEach(el=>el.textContent=s.short_title||s.site_title||"Portal");
@@ -48,12 +83,12 @@ if(s.site_title)document.title=document.title.replace("{{SITE_TITLE}}",s.site_ti
 const Search={ready:false,items:[],async build(){if(this.ready)return;
 const [A,P,F,H,R,M,E]=await Promise.all([fetchJson("data/articles.json"),fetchJson("data/places.json"),fetchJson("data/faq.json"),fetchJson("data/hotels.json"),fetchJson("data/restaurants.json"),fetchJson("data/music.json"),fetchJson("data/events.json")]);
 const items=[];
-for(const a of (A.articles||[])){const md=await fetchText(`posts/${a.slug}.md`);items.push({type:"Article",title:a.title,url:`post.html?slug=${encodeURIComponent(a.slug)}`,cover:a.cover||"assets/images/cover_default.jpg",text:norm([a.title,a.excerpt,a.description,a.category,(a.tags||[]).join(" "),md].join(" ")),featured:!!a.featured,priority:+(a.priority||0),snippet:a.excerpt||""});}
-for(const p of (P.places||[])){const md=await fetchText(`posts/${p.slug}.md`);items.push({type:"Place",title:p.title,url:`post.html?slug=${encodeURIComponent(p.slug)}`,cover:p.cover||"assets/images/cover_default.jpg",text:norm([p.title,p.excerpt,p.description,p.distance,p.category,(p.tags||[]).join(" "),md].join(" ")),featured:!!p.featured,priority:+(p.priority||0),snippet:p.excerpt||""});}
+for(const a of (A.articles||[])){const md=await fetchText(`posts/${a.slug}.md`);items.push({type:"Article",title:a.title,url:`post.html?slug=${encodeURIComponent(a.slug)}`,cover:a.cover||"assets/images/cover_default.jpg",text:norm([a.title,a.excerpt,a.description,a.category,(a.tags||[]).join(" "),md].join(" ")),featured:!!a.featured,priority:+(a.priority||0),snippet:(a.category||"Life"),snippet_long:(a.excerpt||a.description||"")});}
+for(const p of (P.places||[])){const md=await fetchText(`posts/${p.slug}.md`);items.push({type:"Place",title:p.title,url:`post.html?slug=${encodeURIComponent(p.slug)}`,cover:p.cover||"assets/images/cover_default.jpg",text:norm([p.title,p.excerpt,p.description,p.distance,p.category,(p.tags||[]).join(" "),md].join(" ")),featured:!!p.featured,priority:+(p.priority||0),snippet:[p.distance,p.category].filter(Boolean).join(" • ")||"Nature",snippet_long:(p.excerpt||p.description||"")});}
 for(const f of (F.faq||[])){items.push({type:"FAQ",title:f.q,url:`faq.html#${encodeURIComponent(f.id||"")}`,cover:"assets/images/cover_default.jpg",text:norm([f.q,f.a,(f.tags||[]).join(" ")].join(" ")),featured:!!f.featured,priority:+(f.priority||0),snippet:(f.a||"").slice(0,140)});}
-for(const h of (H.hotels||[])){items.push({type:"Hotel",title:h.name,url:`item.html?type=hotels&id=${encodeURIComponent(h.id||"")}`,cover:h.cover||"assets/images/cover_default.jpg",text:norm([h.name,h.type,h.price,h.area,h.description,h.address,(h.tags||[]).join(" ")].join(" ")),featured:!!h.featured,priority:+(h.priority||0),snippet:h.description||""});}
-for(const r of (R.restaurants||[])){items.push({type:"Restaurant",title:r.name,url:`item.html?type=restaurants&id=${encodeURIComponent(r.id||"")}`,cover:r.cover||"assets/images/cover_default.jpg",text:norm([r.name,r.type,r.price,r.area,r.description,r.address,(r.tags||[]).join(" ")].join(" ")),featured:!!r.featured,priority:+(r.priority||0),snippet:r.description||""});}
-for(const m of (M.music||[])){items.push({type:"Music",title:m.place,url:`item.html?type=music&id=${encodeURIComponent(m.id||"")}`,cover:m.cover||"assets/images/cover_default.jpg",text:norm([m.place,m.genre,m.description,m.address,(m.tags||[]).join(" ")].join(" ")),featured:!!m.featured,priority:+(m.priority||0),snippet:m.description||""});}
+for(const h of (H.hotels||[])){items.push({type:"Hotel",title:h.name,url:`item.html?type=hotels&id=${encodeURIComponent(h.id||"")}`,cover:h.cover||"assets/images/cover_default.jpg",text:norm([h.name,h.type,h.price,h.area,h.description,h.address,(h.tags||[]).join(" ")].join(" ")),featured:!!h.featured,priority:+(h.priority||0),snippet:[h.area,h.price].filter(Boolean).join(" • ")||"Hotel",snippet_long:(h.description||"")});}
+for(const r of (R.restaurants||[])){items.push({type:"Restaurant",title:r.name,url:`item.html?type=restaurants&id=${encodeURIComponent(r.id||"")}`,cover:r.cover||"assets/images/cover_default.jpg",text:norm([r.name,r.type,r.price,r.area,r.description,r.address,(r.tags||[]).join(" ")].join(" ")),featured:!!r.featured,priority:+(r.priority||0),snippet:[r.type,r.price,r.area].filter(Boolean).join(" • ")||"Food",snippet_long:(r.description||"")});}
+for(const m of (M.music||[])){items.push({type:"Music",title:m.place,url:`item.html?type=music&id=${encodeURIComponent(m.id||"")}`,cover:m.cover||"assets/images/cover_default.jpg",text:norm([m.place,m.genre,m.description,m.address,(m.tags||[]).join(" ")].join(" ")),featured:!!m.featured,priority:+(m.priority||0),snippet:[m.genre,m.best_day].filter(Boolean).join(" • ")||"Music",snippet_long:(m.description||"")});}
 for(const e of (E.events||[])){items.push({type:"Event",title:e.title,url:`event.html?id=${encodeURIComponent(e.id)}`,cover:e.cover||"assets/images/cover_default.jpg",text:norm([e.title,e.description,e.category,e.venue,e.address,e.date,e.time,(e.tags||[]).join(" ")].join(" ")),featured:!!e.featured,priority:+(e.priority||0),snippet:`${e.date} • ${e.time||"TBA"} • ${e.venue||""}`});}
 items.sort((a,b)=>(b.featured-a.featured)||(b.priority-a.priority)||a.title.localeCompare(b.title));
 this.items=items;this.ready=true;},
@@ -65,11 +100,22 @@ function renderResults(c,rs){c.innerHTML="";if(!rs.length){c.innerHTML=`<div cla
 for(const r of rs){const el=document.createElement("div");el.className="result";el.innerHTML=`<div class="type">${esc(r.type)}</div><div class="title"><a href="${esc(r.url)}">${esc(r.title)}</a></div><div class="snippet">${esc(r.snippet||"")}</div>`;c.appendChild(el);}}
 function bindSearch(input,btn,fn){if(!input)return;const run=()=>fn(input.value||"");input.addEventListener("input",run);
 input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();run();}});if(btn)btn.addEventListener("click",e=>{e.preventDefault();run();});}
-App.initSite=async function(){setActiveNav();setYear();initMenu();const s=await site();applyBrand(s);const ig=$("igLink");if(ig&&s.instagram_url)ig.href=s.instagram_url;};
-App.initHome=async function(){await App.initSite();const s=await site();await Search.build();
-const ig=$("igBtn");if(ig&&s.instagram_url)ig.href=s.instagram_url;const c=$("communityLink");if(c&&s.telegram_url)c.href=s.telegram_url;
-const f=$("featuredList");if(f)renderResults(f,Search.featured(10));const input=$("globalSearch");const out=$("globalResults");
-bindSearch(input,null,()=>renderResults(out,Search.query(input.value,30)));};
+App.initSite=async function(){setActiveNav();setYear();initMenu();initHeaderSearch();const s=await site();applyBrand(s);const ig=$("igLink");if(ig&&s.instagram_url)ig.href=s.instagram_url;};
+App.initHome=async function(){
+  await App.initSite();
+  const s=await site();
+  await Search.build();
+  const ig=$("igBtn");if(ig&&s.instagram_url)ig.href=s.instagram_url;
+  const c=$("communityLink");if(c&&s.telegram_url)c.href=s.telegram_url;
+  const f=$("featuredList");if(f)renderResults(f,Search.featured(10));
+  const sh=$("scrollHint");
+  if(sh){
+    sh.addEventListener("click",()=>{
+      const target=$("featuredSection");
+      if(target) target.scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  }
+};
 App.initListPage=async function({dataset,searchInputId,searchBtnId,listId,renderItem}){await App.initSite();const data=await fetchJson(dataset);const items=(Object.values(data)[0]||[]).slice();
 const input=$(searchInputId);const btn=searchBtnId?$(searchBtnId):null;const list=$(listId);
 function apply(q){const qq=norm(q);const filtered=!qq?items:items.filter(it=>{const hay=norm(JSON.stringify(it));return qq.split(" ").filter(Boolean).every(p=>hay.includes(p));});
@@ -133,4 +179,64 @@ b.innerHTML=`<div class="meta" style="margin-top:6px;"><span>🗓️ ${esc(fmtDa
 ${e.contact?`<div class="filters" style="margin-top:14px;"><span class="badge accent">Contact: ${esc(e.contact)}</span></div>`:""}
 <div class="filters" style="margin-top:14px;">${e.source_url?`<a class="btn" target="_blank" rel="noreferrer" href="${esc(e.source_url)}">Source / flyer</a>`:""}<a class="btn ghost" href="events.html">Back to Events</a></div>`;
 document.title=`${e.title} — ${document.title}`;};
+
+App.initSearchPage=async function(){
+  await App.initSite();
+  await Search.build();
+  const params=new URLSearchParams(location.search);
+  const q=params.get("q")||"";
+  const input=document.getElementById("searchInput");
+  const out=document.getElementById("searchResults");
+  const qLabel=document.getElementById("queryLabel");
+  if(input) input.value=q;
+  if(qLabel) qLabel.textContent=q ? `Results for “${q}”` : "Search the portal";
+  function renderCards(rs){
+    if(!out) return;
+    out.innerHTML="";
+    if(!rs.length){
+      out.innerHTML=`<div class="muted small" style="padding:12px;">No results.</div>`;
+      return;
+    }
+    for(const r of rs){
+      const kind=(r.type||"").toLowerCase();
+      const el=document.createElement("a");
+      el.className="result-card";
+      el.href=r.url;
+      el.setAttribute("data-kind", kind);
+      const meta=r.snippet||"";
+      el.innerHTML=`
+        <div class="rc-cover" style="background-image:url('${esc(r.cover||"assets/images/cover_default.jpg")}')"></div>
+        <div class="rc-body">
+          <div class="rc-top">
+            <span class="rc-badge">${esc(r.type)}</span>
+            <span class="rc-meta">${esc(meta)}</span>
+          </div>
+          <div class="rc-title">${esc(r.title)}</div>
+          <div class="rc-snippet">${esc(r.snippet_long||r.snippet||"")}</div>
+        </div>`;
+      out.appendChild(el);
+    }
+  }
+  function run(query){
+    const rs=Search.query(query,40);
+    renderCards(rs);
+  }
+  if(input){
+    input.addEventListener("keydown",(e)=>{
+      if(e.key==="Enter"){e.preventDefault(); run(input.value||"");}
+    });
+  }
+  const form=document.getElementById("searchPageForm");
+  if(form){
+    form.addEventListener("submit",(e)=>{
+      e.preventDefault();
+      const v=(input&&input.value)||"";
+      history.replaceState({}, "", v?`search.html?q=${encodeURIComponent(v)}`:"search.html");
+      if(qLabel) qLabel.textContent=v ? `Results for “${v}”` : "Search the portal";
+      run(v);
+    });
+  }
+  run(q);
+};
+
 window.App=App;})();

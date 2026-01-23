@@ -97,3 +97,257 @@ textarea{min-height:120px;resize:vertical}
 .tile[data-tile="hotels"]{--tile-tint:rgba(200,150,255,.18)}
 .tile[data-tile="food"]{--tile-tint:rgba(255,120,150,.16)}
 .tile[data-tile="music"]{--tile-tint:rgba(120,200,255,.16)}
+
+
+
+/* ===== v7: header dropdown menu + header search ===== */
+.header{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.header-actions{display:flex;align-items:center;gap:10px}
+
+.icon-btn{
+  width:44px;height:44px;
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.25);
+  -webkit-tap-highlight-color:transparent;
+}
+.icon-btn:hover{transform:translateY(-1px);transition:.12s ease}
+.icon-btn:active{transform:translateY(0);transition:.08s ease}
+
+.icon-search{
+  width:18px;height:18px;display:block;position:relative;
+}
+.icon-search:before,.icon-search:after{
+  content:"";position:absolute;display:block;
+}
+.icon-search:before{
+  width:12px;height:12px;left:0;top:0;
+  border:2px solid rgba(255,255,255,.86);
+  border-radius:999px;
+}
+.icon-search:after{
+  width:8px;height:2px;
+  right:-2px;bottom:-1px;
+  background:rgba(255,255,255,.86);
+  transform:rotate(45deg);
+  border-radius:2px;
+}
+
+.icon-menu{width:18px;height:14px;display:block;position:relative}
+.icon-menu:before,.icon-menu:after,.icon-menu i{
+  content:"";position:absolute;left:0;right:0;height:2px;border-radius:2px;background:rgba(255,255,255,.86)
+}
+.icon-menu:before{top:0}
+.icon-menu i{top:6px}
+.icon-menu:after{bottom:0}
+
+.nav-panel{
+  display:none;
+  position:absolute;
+  top:72px; right:12px;
+  width:min(320px, calc(100vw - 24px));
+  padding:12px;
+  border-radius:18px;
+  background:rgba(18,20,27,.92);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 18px 40px rgba(0,0,0,.45);
+  backdrop-filter:blur(14px);
+  z-index:50;
+}
+.nav-panel.open{display:flex;flex-direction:column;gap:8px}
+.nav-panel a{
+  padding:10px 12px;border-radius:14px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.06);
+  color:var(--text);
+}
+.nav-panel a:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}
+.nav-panel a.active{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.24)}
+
+.search-panel{
+  position:absolute;
+  top:72px; right:64px;
+  width:min(520px, calc(100vw - 24px));
+  display:none;
+  padding:12px;
+  border-radius:18px;
+  background:rgba(18,20,27,.92);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 18px 40px rgba(0,0,0,.45);
+  backdrop-filter:blur(14px);
+  z-index:60;
+}
+.search-panel.open{display:block}
+.search-form{display:flex;gap:10px;align-items:center}
+.search-form .input{flex:1}
+.search-form .btn{white-space:nowrap}
+
+/* Hide old nav if any remained */
+.nav,.menu-btn{display:none !important}
+
+
+/* ===== v9: home tiles + scroll hint ===== */
+.tiles{margin-top:16px}
+
+/* Keep tiles compact and click-attractive */
+.tile{
+  padding:0;
+  min-height:160px;
+  aspect-ratio: 1/1;
+  display:flex;
+  align-items:stretch;
+  justify-content:flex-end;
+  transform:translateZ(0);
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.tile:hover{transform:translateY(-2px) scale(1.01); border-color:rgba(255,255,255,.22); box-shadow:0 14px 45px rgba(0,0,0,.45)}
+.tile:active{transform:translateY(0px) scale(.995)}
+
+/* Text panel at bottom */
+.tile-text{
+  width:100%;
+  align-self:flex-end;
+  position:relative;
+  padding:30px 14px 16px;
+  background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.50) 35%, rgba(0,0,0,.78) 100%);
+  border-top:1px solid rgba(255,255,255,.10);
+  backdrop-filter:blur(10px);
+}
+.tile-text::before{
+  content:"";
+  position:absolute;
+  left:14px; top:12px;
+  width:40px; height:4px;
+  border-radius:999px;
+  background:var(--accent, rgba(255,255,255,.35));
+  opacity:.95;
+}
+.tile .k{font-weight:950;font-size:18px; letter-spacing:.2px}
+.tile .d{
+  display:inline-block;
+  margin-top:8px;
+  padding:7px 10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  color:rgba(232,236,255,.90);
+}
+
+/* Category accents */
+.tile[data-tile="life"]{--accent: rgba(70, 160, 220, .85)}
+.tile[data-tile="nature"]{--accent: rgba(85, 210, 140, .85)}
+.tile[data-tile="events"]{--accent: rgba(200, 120, 255, .85)}
+.tile[data-tile="hotels"]{--accent: rgba(255, 190, 95, .85)}
+.tile[data-tile="food"]{--accent: rgba(255, 125, 105, .85)}
+.tile[data-tile="music"]{--accent: rgba(140, 160, 255, .85)}
+
+/* Mobile: keep 2 columns and reduce height so more fits on first screen */
+@media(max-width:620px){
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .tile{min-height:118px; aspect-ratio: 1/1}
+  .tile-text{padding:26px 10px 12px}
+  .tile-text::before{left:10px}
+  .tile .k{font-size:15px}
+  .tile .d{font-size:12px; padding:6px 8px; margin-top:6px}
+}
+
+/* Scroll hint (arrow down) */
+.scroll-hint{
+  margin:14px auto 0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  color:rgba(232,236,255,.85);
+  cursor:pointer;
+  backdrop-filter:blur(10px);
+}
+.scroll-hint:hover{border-color:rgba(255,255,255,.22)}
+.scroll-hint-text{font-size:13px}
+.scroll-hint-arrow{
+  width:10px;height:10px;
+  border-right:2px solid rgba(232,236,255,.85);
+  border-bottom:2px solid rgba(232,236,255,.85);
+  transform:rotate(45deg);
+  animation:hintBounce 1.6s infinite;
+}
+@keyframes hintBounce{
+  0%,100%{transform:rotate(45deg) translate(0,0); opacity:.9}
+  50%{transform:rotate(45deg) translate(0,4px); opacity:1}
+}
+@media (min-width: 900px){
+  .scroll-hint{display:none}
+}
+
+
+/* ===== v7: search page results ===== */
+.search-page{display:flex;gap:10px;align-items:center}
+.search-page .input{flex:1}
+.result-grid{display:grid;gap:12px;margin-top:16px}
+.result-card{
+  display:grid;
+  grid-template-columns: 96px 1fr;
+  gap:12px;
+  padding:12px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  text-decoration:none;
+  color:var(--text);
+  box-shadow:0 16px 34px rgba(0,0,0,.28);
+}
+.result-card:hover{transform:translateY(-1px);transition:.12s ease;border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.06)}
+.rc-cover{
+  border-radius:14px;
+  background-size:cover;
+  background-position:center;
+  border:1px solid rgba(255,255,255,.10);
+  min-height:78px;
+}
+.rc-body{min-width:0}
+.rc-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rc-badge{
+  font-size:12px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.35);
+  color:rgba(255,255,255,.92);
+}
+.rc-meta{font-size:12px;color:var(--muted)}
+.rc-title{
+  margin-top:6px;
+  font-weight:800;
+  letter-spacing:-.02em;
+  text-decoration:underline;
+  text-decoration-color:rgba(255,255,255,.20);
+  text-underline-offset:3px;
+}
+.result-card:hover .rc-title{text-decoration-color:rgba(255,255,255,.45)}
+.rc-snippet{margin-top:6px;color:var(--muted);font-size:14px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* theme tint */
+.result-card[data-kind="article"]{border-left:4px solid rgba(118, 206, 255, .7)}
+.result-card[data-kind="place"]{border-left:4px solid rgba(125, 232, 165, .7)}
+.result-card[data-kind="event"]{border-left:4px solid rgba(176, 116, 255, .7)}
+.result-card[data-kind="food"]{border-left:4px solid rgba(255, 152, 122, .7)}
+.result-card[data-kind="restaurant"]{border-left:4px solid rgba(255, 152, 122, .7)}
+.result-card[data-kind="hotel"]{border-left:4px solid rgba(255, 209, 120, .7)}
+.result-card[data-kind="music"]{border-left:4px solid rgba(140, 178, 255, .7)}
+.result-card[data-kind="life"]{border-left:4px solid rgba(118, 206, 255, .7)}
+.result-card[data-kind="nature"]{border-left:4px solid rgba(125, 232, 165, .7)}
+.result-card[data-kind="faq"]{border-left:4px solid rgba(200, 200, 200, .5)}
+
+/* mobile */
+@media (max-width: 720px){
+  .tile{aspect-ratio: 1.15/1; min-height:140px}
+  .result-card{grid-template-columns: 80px 1fr}
+  .search-panel{right:12px}
+}
