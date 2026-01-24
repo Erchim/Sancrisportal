@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Community — Events San Cristobal</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+  <link rel="stylesheet" href="assets/style.css?v=24.0" />
+  <meta name="description" content="Community posts, stories, and local recommendations." />
+</head>
+<body class="page">
+  <header class="topbar">
+    <div class="brand">
+      <a class="brand-link" href="index.html" aria-label="Home">
+        <span class="brand-name">Events San Cristobal</span>
+      </a>
+      <span class="brand-tag">Community</span>
+    </div>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="Search" aria-expanded="false" aria-controls="searchPanel">🔎</button>
+      <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="siteNav">☰</button>
+    </div>
+
+    <nav class="nav-panel" id="siteNav" hidden>
+      <a href="search.html" data-action="open-search">Search</a>
+      <a href="index.html">Home</a>
+      <a href="articles.html">Life</a>
+      <a href="nature.html">Nature</a>
+      <a href="events.html">Events</a>
+      <a href="hotels.html">Hotels</a>
+      <a href="restaurants.html">Food</a>
+      <a href="music.html">Music</a>
+      <a href="faq.html">FAQ</a>
+      <a href="community.html">Community</a>
+      <a href="forum.html">Forum</a>
+      <a href="businesses.html">Businesses</a>
+      <a href="submit.html">Submit</a>
+    </nav>
+
+    <div class="search-panel" id="searchPanel" hidden>
+      <form class="search-form" action="search.html" method="get">
+        <input class="search-input" id="headerSearchInput" type="search" name="q" placeholder="Search the portal…" autocomplete="off" />
+        <button class="btn" type="submit">Search</button>
+      </form>
+      <div class="suggestions" id="headerSuggestions" hidden></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero hero-simple">
+      <h1 class="h1">Community posts</h1>
+      <p class="lead">Local stories, guides, and recommendations — written by people who live, travel, and build in San Cristóbal.</p>
+      <div class="hero-actions">
+        <a class="btn" href="submit-post.html">Submit a post</a>
+        <a class="btn ghost" href="account.html">Account</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="filters">
+        <input id="communityQ" class="input" type="search" placeholder="Search community posts…" />
+        <select id="communityType" class="input">
+          <option value="">All types</option>
+          <option value="story">Story</option>
+          <option value="business">Business</option>
+          <option value="guide">Guide</option>
+          <option value="artist">Artist</option>
+        </select>
+        <button class="btn" id="communityGo">Search</button>
+      </div>
+
+      <div id="communityList" class="cards"></div>
+      <div class="muted small" id="communityHint"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>© <span id="year"></span> <span data-site-title>Portal</span></div>
+      <div class="muted">Built for travelers & locals</div>
+    </div>
+  </footer>
+
+  <script src="assets/app.js?v=24.0"></script>
+  <script type="module" src="assets/auth-nav.mjs?v=24.0"></script>
+  <script type="module">
+    import { isConfigured, listCommunityPosts } from "./assets/community.mjs?v=24.0";
+
+    const list = document.getElementById('communityList');
+    const hint = document.getElementById('communityHint');
+    const q = document.getElementById('communityQ');
+    const type = document.getElementById('communityType');
+    const go = document.getElementById('communityGo');
+
+    function esc(s){
+      return String(s??'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;' }[m]));
+    }
+
+    function card(p){
+      const cover = p.cover_url || 'assets/images/cover_default.jpg';
+      const authorName = p.profiles?.display_name || 'Anonymous';
+      const author = p.profiles?.id ? `<a class="u-link" href="user.html?id=${encodeURIComponent(p.profiles.id)}">${esc(authorName)}</a>` : esc(authorName);
+      const date = new Date(p.created_at).toLocaleDateString(undefined, {year:'numeric',month:'short',day:'numeric'});
+      const url = `community-post.html?id=${encodeURIComponent(p.id)}`;
+      return `
+        <article class="card card-wide">
+          <a class="card-cover" href="${url}" style="background-image:url('${cover}')" aria-label="Open"></a>
+          <div class="card-body">
+            <a class="card-title" href="${url}">${esc(p.title)}</a>
+            <div class="muted small">${esc(p.post_type)} • ${author} • ${esc(date)}</div>
+          </div>
+        </article>
+      `;
+    }
+
+    async function load(){
+      if(!isConfigured()){
+        hint.innerHTML = 'Community is not connected yet. Configure <span class="kbd">assets/supabase-config.js</span>.';
+        list.innerHTML = '';
+        return;
+      }
+      hint.textContent = '';
+      const items = await listCommunityPosts({
+        limit: 40,
+        type: (type.value||'').trim() || null,
+        q: (q.value||'').trim() || null
+      });
+      list.innerHTML = items.length ? items.map(card).join('') : `<div class="muted">No approved community posts yet.</div>`;
+    }
+
+    go?.addEventListener('click', load);
+    q?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); load(); } });
+    type?.addEventListener('change', load);
+    load();
+  </script>
+</body>
+</html>

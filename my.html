@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>My — Events San Cristobal</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+  <link rel="stylesheet" href="assets/style.css?v=24.0" />
+  <meta name="description" content="Your submissions, threads, and reports." />
+</head>
+<body class="page">
+  <header class="topbar">
+    <div class="brand">
+      <a class="brand-link" href="index.html" aria-label="Home">
+        <span class="brand-name">Events San Cristobal</span>
+      </a>
+      <span class="brand-tag">My</span>
+    </div>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="Search" aria-expanded="false" aria-controls="searchPanel">🔎</button>
+      <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="menuPanel">☰</button>
+    </div>
+  </header>
+
+  <div class="search-panel" id="searchPanel" hidden>
+    <form class="search-form" action="search.html" method="GET">
+      <input class="search-input" id="headerSearchInput" type="search" name="q" placeholder="Search the portal…" autocomplete="off" />
+      <button class="btn" type="submit">Search</button>
+    </form>
+    <div class="search-help muted">Tip: try “cafe”, “live music”, “Arcotete”, “temazcal”, “wifi”.</div>
+  </div>
+
+  <nav class="menu-panel" id="menuPanel" hidden></nav>
+
+  <main class="wrap">
+    <section class="hero hero-simple">
+      <h1 class="h1">My dashboard</h1>
+      <p class="lead">See what you’ve submitted, what’s pending moderation, and your reports.</p>
+    </section>
+
+    <section class="section">
+      <div class="card" id="stateCard" style="padding:16px;">
+        <div id="state" class="muted">Loading…</div>
+      </div>
+
+      <div class="grid2" style="margin-top:14px;">
+        <div class="card" style="padding:16px;">
+          <h2 style="margin:0 0 10px 0;">My posts</h2>
+          <div id="myPosts" class="list"></div>
+        </div>
+        <div class="card" style="padding:16px;">
+          <h2 style="margin:0 0 10px 0;">My businesses</h2>
+          <div id="myBusinesses" class="list"></div>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:14px;">
+        <div class="card" style="padding:16px;">
+          <h2 style="margin:0 0 10px 0;">My forum threads</h2>
+          <div id="myThreads" class="list"></div>
+        </div>
+        <div class="card" style="padding:16px;">
+          <h2 style="margin:0 0 10px 0;">My replies</h2>
+          <div id="myReplies" class="list"></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px; margin-top:14px;">
+        <h2 style="margin:0 0 10px 0;">My reports</h2>
+        <div id="myReports" class="list"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-title">Events San Cristobal</div>
+          <div class="muted">Community hub for events, life tips, nature trips, food, and local creators.</div>
+        </div>
+        <div>
+          <div class="footer-title">Quick links</div>
+          <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="events.html">Events</a>
+            <a href="forum.html">Forum</a>
+            <a href="submit.html">Submit</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom muted">© <span id="y"></span> Events San Cristobal</div>
+    </div>
+  </footer>
+
+  <script src="assets/app.js?v=24.0"></script>
+  <script type="module">
+    import { isConfigured, getUser, getMyProfile, listMyDashboard } from "./assets/community.mjs?v=24.0";
+
+    const state = document.getElementById("state");
+    const elPosts = document.getElementById("myPosts");
+    const elBiz = document.getElementById("myBusinesses");
+    const elThreads = document.getElementById("myThreads");
+    const elReplies = document.getElementById("myReplies");
+    const elReports = document.getElementById("myReports");
+
+    function esc(s){ return String(s||"").replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+
+    function row({title, meta, href}){
+      const aStart = href ? `<a class="row" href="${href}">` : `<div class="row">`;
+      const aEnd = href ? `</a>` : `</div>`;
+      return `${aStart}
+        <div>
+          <div class="row-title">${esc(title)}</div>
+          <div class="row-meta">${meta}</div>
+        </div>
+      ${aEnd}`;
+    }
+
+    function pillStatus(st){
+      const s = esc(st||"");
+      return `<span class="pill">${s.toUpperCase()}</span>`;
+    }
+
+    function empty(el, msg){
+      el.innerHTML = `<div class="muted">${esc(msg)}</div>`;
+    }
+
+    async function main(){
+      document.getElementById("y").textContent = new Date().getFullYear();
+
+      if(!isConfigured()){
+        state.innerHTML = `Supabase is not configured yet. Set SUPABASE_URL and SUPABASE_ANON_KEY in <code>assets/supabase-config.js</code>.`;
+        return;
+      }
+
+      const user = await getUser().catch(()=>null);
+      if(!user){
+        state.innerHTML = `You are signed out. <a href="account.html">Sign in</a> to see your dashboard.`;
+        empty(elPosts,"Sign in to see your content."); empty(elBiz,""); empty(elThreads,""); empty(elReplies,""); empty(elReports,"");
+        return;
+      }
+
+      const dash = await listMyDashboard().catch((e)=>{ state.textContent = e?.message || "Could not load."; return null; });
+      if(!dash){
+        state.innerHTML = `Could not load your profile. <a href="account.html">Open account</a>.`;
+        return;
+      }
+
+      const prof = dash.profile;
+      state.innerHTML = `Signed in as <b>${esc(prof.display_name || prof.email || "User")}</b> • ${pillStatus(prof.status)} • role: ${esc(prof.role)}<br/>
+        <span class="muted">If your status is <b>PENDING</b>, you can submit drafts, but posting/commenting requires approval.</span>`;
+
+      // Posts
+      if(!dash.posts.length) empty(elPosts,"No posts yet.");
+      else elPosts.innerHTML = dash.posts.map((p)=>{
+        const href = `community-post.html?id=${encodeURIComponent(p.id)}`;
+        const meta = `${pillStatus(p.status)} <span class="muted">• ${esc(p.post_type || "post")} • ${new Date(p.created_at).toLocaleString()}</span>`;
+        return row({title: p.title || "(Untitled)", meta, href});
+      }).join("");
+
+      // Businesses
+      if(!dash.businesses.length) empty(elBiz,"No business profiles yet.");
+      else elBiz.innerHTML = dash.businesses.map((b)=>{
+        const href = `business.html?id=${encodeURIComponent(b.id)}`;
+        const meta = `${pillStatus(b.status)} <span class="muted">• ${(b.category||"other")} • ${new Date(b.created_at).toLocaleString()}</span>`;
+        return row({title: b.name || "(No name)", meta, href});
+      }).join("");
+
+      // Threads
+      if(!dash.threads.length) empty(elThreads,"No threads yet.");
+      else elThreads.innerHTML = dash.threads.map((t)=>{
+        const href = `forum-thread.html?id=${encodeURIComponent(t.id)}`;
+        const cat = t.forum_categories?.title || t.forum_categories?.slug || "Forum";
+        const meta = `${pillStatus(t.status)} <span class="muted">• ${esc(cat)} • ${new Date(t.created_at).toLocaleString()}</span>`;
+        return row({title: t.title || "(No title)", meta, href});
+      }).join("");
+
+      // Replies
+      if(!dash.replies.length) empty(elReplies,"No replies yet.");
+      else elReplies.innerHTML = dash.replies.map((r)=>{
+        const href = `forum-thread.html?id=${encodeURIComponent(r.thread_id)}`;
+        const thread = r.forum_threads?.title || "Thread";
+        const meta = `${pillStatus(r.status)} <span class="muted">• ${esc(thread)} • ${new Date(r.created_at).toLocaleString()}</span>`;
+        return row({title: (r.body||"").slice(0,80) + ((r.body||"").length>80 ? "…" : ""), meta, href});
+      }).join("");
+
+      // Reports
+      if(!dash.reports.length) empty(elReports,"No reports yet.");
+      else elReports.innerHTML = dash.reports.map((r)=>{
+        const meta = `${pillStatus(r.status)} <span class="muted">• ${esc(r.content_ref)} • ${new Date(r.created_at).toLocaleString()}</span>`;
+        return row({title: r.reason || "Report", meta, href: null});
+      }).join("");
+    }
+
+    main();
+  </script>
+</body>
+</html>

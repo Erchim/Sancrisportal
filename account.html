@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Account — Events San Cristobal</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+  <link rel="stylesheet" href="assets/style.css?v=24.0" />
+  <meta name="description" content="Sign in to comment and submit posts." />
+</head>
+<body class="page">
+  <header class="topbar">
+    <div class="brand">
+      <a class="brand-link" href="index.html" aria-label="Home">
+        <span class="brand-name">Events San Cristobal</span>
+      </a>
+      <span class="brand-tag">Account</span>
+    </div>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="Search" aria-expanded="false" aria-controls="searchPanel">🔎</button>
+      <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="siteNav">☰</button>
+    </div>
+
+    <nav class="nav-panel" id="siteNav" hidden>
+      <a href="search.html" data-action="open-search">Search</a>
+      <a href="index.html">Home</a>
+      <a href="articles.html">Life</a>
+      <a href="nature.html">Nature</a>
+      <a href="events.html">Events</a>
+      <a href="hotels.html">Hotels</a>
+      <a href="restaurants.html">Food</a>
+      <a href="music.html">Music</a>
+      <a href="faq.html">FAQ</a>
+      <a href="community.html">Community</a>
+      <a href="forum.html">Forum</a>
+      <a href="businesses.html">Businesses</a>
+      <a href="submit.html">Submit</a>
+    </nav>
+
+    <div class="search-panel" id="searchPanel" hidden>
+      <form class="search-form" action="search.html" method="get">
+        <input class="search-input" id="headerSearchInput" type="search" name="q" placeholder="Search the portal…" autocomplete="off" />
+        <button class="btn" type="submit">Search</button>
+      </form>
+      <div class="suggestions" id="headerSuggestions" hidden></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero hero-simple">
+      <h1 class="h1">Your account</h1>
+      <p class="lead">Sign in to comment, rate, and submit posts. Accounts are pre-approved to keep the community clean.</p>
+    </section>
+
+    <section class="section">
+      <div id="accountBox" class="card" style="padding:16px;"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>© <span id="year"></span> <span data-site-title>Portal</span></div>
+      <div class="muted">Built for travelers & locals</div>
+    </div>
+  </footer>
+
+  <script src="assets/app.js?v=24.0"></script>
+  <script type="module" src="assets/auth-nav.mjs?v=24.0"></script>
+  <script type="module">
+    import { isConfigured, getUser, getMyProfile, sendMagicLink, updateMyProfile, signOut } from "./assets/community.mjs?v=24.0";
+
+    const box = document.getElementById('accountBox');
+
+    function esc(s){return String(s??'').replace(/[&<>'"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));}
+
+    function renderNotConfigured(){
+      box.innerHTML = `
+        <div class="notice">
+          <div class="notice-title">Community is not connected yet</div>
+          <div class="notice-body">Edit <span class="kbd">assets/supabase-config.js</span> and add your Supabase Project URL + anon key.</div>
+        </div>
+      `;
+    }
+
+    function renderSignedOut(){
+      box.innerHTML = `
+        <h2 style="margin:0 0 10px 0;">Sign in</h2>
+        <p class="muted">We use a magic link (email). No password required.</p>
+        <div class="filters" style="gap:10px;">
+          <input id="email" class="input" type="email" placeholder="your@email.com" style="min-width:260px;" />
+          <button class="btn" id="send">Send link</button>
+        </div>
+        <div class="muted small" id="msg" style="margin-top:10px;"></div>
+      `;
+      const email = document.getElementById('email');
+      const send = document.getElementById('send');
+      const msg = document.getElementById('msg');
+      const go = async ()=>{
+        const v = (email.value||'').trim();
+        if(!v) return;
+        msg.textContent = 'Sending…';
+        try{
+          await sendMagicLink(v);
+          msg.textContent = 'Check your email and click the link to finish sign-in.';
+        }catch(e){
+          msg.textContent = e?.message || 'Could not send link.';
+        }
+      };
+      send?.addEventListener('click', go);
+      email?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+    }
+
+    function statusPill(status){
+      const map = { active:'pill ok', pending:'pill warn', suspended:'pill bad' };
+      return `<span class="${map[status]||'pill'}">${esc(status||'unknown')}</span>`;
+    }
+
+    function renderSignedIn(profile){
+      const isStaff = profile && (profile.role==='owner'||profile.role==='staff');
+      box.innerHTML = `
+        <div class="account-head">
+          <div>
+            <div class="muted small">Signed in as</div>
+            <div style="font-weight:700;">${esc(profile?.email||'')}</div>
+          </div>
+          <div class="account-meta">
+            <div>${statusPill(profile?.status)}</div>
+            <div class="muted small">role: <b>${esc(profile?.role||'user')}</b></div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3 style="margin:0 0 8px 0;">Verification details</h3>
+        <p class="muted small">To post/comment, add a name + phone. Then wait for approval (usually 1–3 days).</p>
+
+        <div class="grid2">
+          <div>
+            <label class="label">Display name</label>
+            <input id="name" class="input" type="text" placeholder="Your name / nickname" value="${esc(profile?.display_name||'')}" />
+          </div>
+          <div>
+            <label class="label">Phone (WhatsApp)</label>
+            <input id="phone" class="input" type="text" placeholder="+52 …" value="${esc(profile?.phone||'')}" />
+          </div>
+        </div>
+
+        <div class="filters" style="margin-top:12px; gap:10px;">
+          <button class="btn" id="save">Save</button>
+          <a class="btn ghost" href="submit-post.html">Submit a post</a>
+          <a class="btn ghost" href="community.html">Community</a>
+          ${isStaff? `<a class="btn ghost" href="admin.html">Admin</a>`:''}
+          <button class="btn ghost" id="logout">Log out</button>
+        </div>
+
+        <div class="muted small" id="msg" style="margin-top:10px;"></div>
+      `;
+
+      const name = document.getElementById('name');
+      const phone = document.getElementById('phone');
+      const save = document.getElementById('save');
+      const logout = document.getElementById('logout');
+      const msg = document.getElementById('msg');
+
+      save?.addEventListener('click', async ()=>{
+        msg.textContent = 'Saving…';
+        try{
+          await updateMyProfile({ display_name: (name.value||'').trim(), phone: (phone.value||'').trim() });
+          msg.textContent = 'Saved. If your status is pending, you will need admin approval.';
+        }catch(e){
+          msg.textContent = e?.message || 'Could not save.';
+        }
+      });
+
+      logout?.addEventListener('click', async ()=>{
+        await signOut();
+        window.location.href = 'index.html';
+      });
+    }
+
+    async function main(){
+      if(!isConfigured()){
+        renderNotConfigured();
+        return;
+      }
+      const user = await getUser().catch(()=>null);
+      if(!user){
+        renderSignedOut();
+        return;
+      }
+      const prof = await getMyProfile().catch(()=>null);
+      if(!prof){
+        renderSignedOut();
+        return;
+      }
+      renderSignedIn(prof);
+    }
+
+    main();
+  </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Post — Events San Cristobal</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+  <link rel="stylesheet" href="assets/style.css?v=24.0" />
+  <meta name="description" content="Community post." />
+</head>
+<body class="page">
+  <header class="topbar">
+    <div class="brand">
+      <a class="brand-link" href="index.html" aria-label="Home">
+        <span class="brand-name">Events San Cristobal</span>
+      </a>
+      <span class="brand-tag">Post</span>
+    </div>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="Search" aria-expanded="false" aria-controls="searchPanel">🔎</button>
+      <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="siteNav">☰</button>
+    </div>
+
+    <nav class="nav-panel" id="siteNav" hidden>
+      <a href="search.html" data-action="open-search">Search</a>
+      <a href="index.html">Home</a>
+      <a href="articles.html">Life</a>
+      <a href="nature.html">Nature</a>
+      <a href="events.html">Events</a>
+      <a href="hotels.html">Hotels</a>
+      <a href="restaurants.html">Food</a>
+      <a href="music.html">Music</a>
+      <a href="faq.html">FAQ</a>
+      <a href="community.html">Community</a>
+      <a href="forum.html">Forum</a>
+      <a href="businesses.html">Businesses</a>
+      <a href="submit.html">Submit</a>
+    </nav>
+
+    <div class="search-panel" id="searchPanel" hidden>
+      <form class="search-form" action="search.html" method="get">
+        <input class="search-input" id="headerSearchInput" type="search" name="q" placeholder="Search the portal…" autocomplete="off" />
+        <button class="btn" type="submit">Search</button>
+      </form>
+      <div class="suggestions" id="headerSuggestions" hidden></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="detail-hero">
+      <div class="detail-hero-img" id="postCover"></div>
+      <div class="detail-hero-overlay">
+        <h1 class="detail-title" id="postTitle">Loading…</h1>
+        <div class="muted small" id="postMeta"></div>
+      </div>
+    </section>
+
+    <section class="detail-wrap">
+      <div class="post-layout">
+        <article>
+          <div id="postBody" class="md"></div>
+        </article>
+        <aside>
+          <div id="postDetails" class="card info-card" hidden></div>
+        </aside>
+      </div>
+
+      <div style="margin-top:18px;">
+        <div id="communityMount"></div>
+      </div>
+
+      <div class="filters" style="margin-top:16px;">
+        <a class="btn ghost" href="community.html">Back to Community</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>© <span id="year"></span> <span data-site-title>Portal</span></div>
+      <div class="muted">Built for travelers & locals</div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="assets/app.js?v=24.0"></script>
+  <script type="module" src="assets/auth-nav.mjs?v=24.0"></script>
+  <script type="module">
+    import { isConfigured, getCommunityPost, initCommentsWidget, makeContentRef } from "./assets/community.mjs?v=24.0";
+
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+
+    const coverEl = document.getElementById('postCover');
+    const titleEl = document.getElementById('postTitle');
+    const metaEl = document.getElementById('postMeta');
+    const bodyEl = document.getElementById('postBody');
+    const detailsEl = document.getElementById('postDetails');
+
+    const esc = (s)=>String(s??'').replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+
+    
+    const ICONS = {
+      pin: `<svg class="meta-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-4.6 7-11a7 7 0 1 0-14 0c0 6.4 7 11 7 11Zm0-9.2a2.8 2.8 0 1 1 0-5.6 2.8 2.8 0 0 1 0 5.6Z"/></svg>`,
+      clock:`<svg class="meta-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a10 10 0 1 0-10-10 10 10 0 0 0 10 10Zm.9-10.6V6.6h-1.8v5.6l4.8 2.9.9-1.5-4-2.2Z"/></svg>`,
+      money:`<svg class="meta-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v2h-2v10h2v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2h2V8Zm10 10a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"/></svg>`,
+      phone:`<svg class="meta-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a16.2 16.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11.4 11.4 0 0 0 3.6.58 1 1 0 0 1 1 1v3.6a1 1 0 0 1-1 1A18.6 18.6 0 0 1 2 4a1 1 0 0 1 1-1h3.6a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .58 3.6 1 1 0 0 1-.24 1Z"/></svg>`,
+      link:`<svg class="meta-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a1 1 0 0 1 0-1.4l3-3a1 1 0 1 1 1.4 1.4l-3 3a1 1 0 0 1-1.4 0ZM8.5 16.5a4 4 0 0 1 0-5.7l2-2A4 4 0 1 1 16.2 14l-.7.7a1 1 0 0 1-1.4-1.4l.7-.7a2 2 0 0 0-2.8-2.8l-2 2a2 2 0 0 0 0 2.8 1 1 0 0 1-1.4 1.4ZM14.8 7.5a1 1 0 0 1 0-1.4l.7-.7A6 6 0 1 1 21 11l-2 2a6 6 0 0 1-8.5 0 1 1 0 0 1 1.4-1.4 4 4 0 0 0 5.7 0l2-2A4 4 0 1 0 15.6 7l-.7.7a1 1 0 0 1-1.4 0Z"/></svg>`,
+      tag:`<svg class="meta-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12l9 9 9-9-9-9H3v9Zm5-5a2 2 0 1 1 2 2 2 2 0 0 1-2-2Z"/></svg>`
+    };
+
+    const clean = (v)=>String(v ?? '').trim();
+    const ensureHttp = (u)=>{
+      const s = clean(u);
+      if(!s) return '';
+      if(/^https?:\/\//i.test(s)) return s;
+      return 'https://' + s;
+    };
+    const instagramUrl = (handleOrUrl)=>{
+      const s = clean(handleOrUrl).replace(/^@/,'');
+      if(!s) return '';
+      if(/^https?:\/\//i.test(s)) return s;
+      return `https://instagram.com/${encodeURIComponent(s)}`;
+    };
+    const waUrl = (num)=>{
+      const raw = clean(num);
+      if(!raw) return '';
+      const digits = raw.replace(/[^0-9]/g,'');
+      if(!digits) return '';
+      // If looks like local MX number, prefix 52
+      const wa = (digits.length===10) ? ('52'+digits) : digits;
+      return `https://wa.me/${wa}`;
+    };
+    const mapsUrlFrom = (meta)=>{
+      const direct = clean(meta?.map_url || meta?.maps_url || meta?.google_maps || '');
+      if(direct) return ensureHttp(direct);
+      const addr = clean(meta?.address || meta?.location || '');
+      if(!addr) return '';
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
+    };
+
+    function row(icon, k, vHtml){
+      return `<div class="meta-row">${icon}<div><div class="meta-k">${esc(k)}</div><div class="meta-v">${vHtml}</div></div></div>`;
+    }
+
+    function renderDetails(p){
+      if(!detailsEl) return;
+      const meta = p?.meta || {};
+      const type = clean(p?.post_type || 'story').toLowerCase();
+      document.documentElement.dataset.accent = type;
+
+      const address = clean(meta.address || meta.location || meta.place || '');
+      const hours = clean(meta.hours || meta.opening_hours || '');
+      const price = clean(meta.price || meta.price_range || meta.entry_fee || '');
+      const phone = clean(meta.phone || meta.contact_phone || '');
+      const whatsapp = clean(meta.whatsapp || meta.wa || meta.contact_whatsapp || '');
+      const website = clean(meta.website || meta.url || '');
+      const insta = clean(meta.instagram || meta.ig || '');
+      const category = clean(meta.category || meta.kind || '');
+      const date = clean(meta.date || meta.event_date || '');
+      const time = clean(meta.time || meta.event_time || '');
+      const booking = clean(meta.booking_url || meta.book || '');
+
+      const tags = Array.isArray(meta.tags) ? meta.tags : (clean(meta.tags) ? clean(meta.tags).split(',').map(s=>s.trim()).filter(Boolean) : []);
+
+      const actions = [];
+      const mapLink = mapsUrlFrom(meta);
+      if(mapLink) actions.push(`<a class="action-pill" href="${esc(mapLink)}" target="_blank" rel="noopener">📍 Map</a>`);
+      if(whatsapp) actions.push(`<a class="action-pill" href="${esc(waUrl(whatsapp))}" target="_blank" rel="noopener">💬 WhatsApp</a>`);
+      if(insta) actions.push(`<a class="action-pill" href="${esc(instagramUrl(insta))}" target="_blank" rel="noopener">📷 Instagram</a>`);
+      if(website) actions.push(`<a class="action-pill" href="${esc(ensureHttp(website))}" target="_blank" rel="noopener">🌐 Website</a>`);
+      if(booking) actions.push(`<a class="action-pill" href="${esc(ensureHttp(booking))}" target="_blank" rel="noopener">🎟️ Book</a>`);
+
+      const rows = [];
+      if(category) rows.push(row(ICONS.tag, 'Category', esc(category)));
+      if(address) rows.push(row(ICONS.pin, 'Location', esc(address)));
+      if(date || time) rows.push(row(ICONS.clock, 'When', esc([date,time].filter(Boolean).join(' • '))));
+      if(hours) rows.push(row(ICONS.clock, 'Hours', esc(hours)));
+      if(price) rows.push(row(ICONS.money, 'Price', esc(price)));
+      if(phone) rows.push(row(ICONS.phone, 'Phone', `<a href="tel:${esc(phone)}">${esc(phone)}</a>`));
+      if(whatsapp) rows.push(row(ICONS.phone, 'WhatsApp', `<a href="${esc(waUrl(whatsapp))}" target="_blank" rel="noopener">${esc(whatsapp)}</a>`));
+      if(website) rows.push(row(ICONS.link, 'Website', `<a href="${esc(ensureHttp(website))}" target="_blank" rel="noopener">${esc(website)}</a>`));
+
+      const hasAny = actions.length || rows.length || tags.length;
+      if(!hasAny){
+        detailsEl.hidden = true;
+        return;
+      }
+
+      detailsEl.hidden = false;
+      detailsEl.innerHTML = `
+        <div class="info-title">Details</div>
+        ${actions.length ? `<div class="info-actions">${actions.join('')}</div>` : ``}
+        ${rows.length ? `<div class="meta-grid">${rows.join('')}</div>` : ``}
+        ${tags.length ? `<div class="chips">${tags.slice(0,10).map(t=>`<span class="chip"><strong>#</strong>${esc(t)}</span>`).join('')}</div>` : ``}
+        <div class="small-note">Community info can change quickly. If it’s important, confirm details before you go.</div>
+      `;
+    }
+
+    async function load(){
+      if(!id){
+        titleEl.textContent = 'Not found';
+        bodyEl.innerHTML = '<p class="muted">Missing post id.</p>';
+        return;
+      }
+      if(!isConfigured()){
+        titleEl.textContent = 'Community not connected';
+        bodyEl.innerHTML = '<p class="muted">Configure Supabase to load community posts.</p>';
+        return;
+      }
+      const p = await getCommunityPost(id);
+      if(!p){
+        titleEl.textContent = 'Not found';
+        bodyEl.innerHTML = '<p class="muted">This post is not approved (yet) or does not exist.</p>';
+        return;
+      }
+      const cover = p.cover_url || 'assets/images/cover_default.jpg';
+      if(coverEl) coverEl.style.backgroundImage = `url('${cover}')`;
+      titleEl.textContent = p.title;
+      const authorName = p.profiles?.display_name || 'Anonymous';
+      const authorLink = p.profiles?.id
+        ? `<a class="u-link" href="user.html?id=${encodeURIComponent(p.profiles.id)}">${esc(authorName)}</a>`
+        : esc(authorName);
+      const date = new Date(p.created_at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+      metaEl.innerHTML = `${esc(p.post_type)} • ${authorLink} • ${esc(date)}`;
+      const html = (window.marked? window.marked.parse(p.content_md||'') : `<pre>${esc(p.content_md||'')}</pre>`);
+      bodyEl.innerHTML = html;
+      renderDetails(p);
+      document.title = `${p.title} — Events San Cristobal`;
+
+      await initCommentsWidget({ mountId: 'communityMount', content_ref: makeContentRef('post', p.id), title: 'Discussion' });
+    }
+
+    load();
+  </script>
+</body>
+</html>

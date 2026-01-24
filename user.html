@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Member — Events San Cristobal</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+  <link rel="stylesheet" href="assets/style.css?v=24.0" />
+  <meta name="description" content="Member profile and contributions." />
+</head>
+<body class="page">
+  <header class="topbar">
+    <div class="brand">
+      <a class="brand-link" href="index.html" aria-label="Home">
+        <span class="brand-name">Events San Cristobal</span>
+      </a>
+      <span class="brand-tag">Member</span>
+    </div>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="Search" aria-expanded="false" aria-controls="searchPanel">🔎</button>
+      <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="siteNav">☰</button>
+    </div>
+
+    <nav class="nav-panel" id="siteNav" hidden>
+      <a href="search.html" data-action="open-search">Search</a>
+      <a href="index.html">Home</a>
+      <a href="articles.html">Life</a>
+      <a href="nature.html">Nature</a>
+      <a href="events.html">Events</a>
+      <a href="hotels.html">Hotels</a>
+      <a href="restaurants.html">Food</a>
+      <a href="music.html">Music</a>
+      <a href="faq.html">FAQ</a>
+      <a href="community.html">Community</a>
+      <a href="forum.html">Forum</a>
+      <a href="businesses.html">Businesses</a>
+      <a href="submit.html">Submit</a>
+    </nav>
+
+    <div class="search-panel" id="searchPanel" hidden>
+      <form class="search-form" action="search.html" method="get">
+        <input class="search-input" id="headerSearchInput" type="search" name="q" placeholder="Search the portal…" autocomplete="off" />
+        <button class="btn" type="submit">Search</button>
+      </form>
+      <div class="suggestions" id="headerSuggestions" hidden></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero hero-simple">
+      <h1 class="h1" id="memberName">Member</h1>
+      <p class="lead" id="memberMeta">Profile & contributions</p>
+      <div class="hero-actions">
+        <a class="btn ghost" href="community.html">Back to Community</a>
+        <a class="btn ghost" href="forum.html">Forum</a>
+      </div>
+    </section>
+
+    <section class="section" id="memberNotice"></section>
+
+    <section class="section">
+      <h2 class="h2">Posts</h2>
+      <div id="postsList"></div>
+    </section>
+
+    <section class="section">
+      <h2 class="h2">Businesses</h2>
+      <div id="bizList"></div>
+    </section>
+
+    <section class="section">
+      <h2 class="h2">Forum topics</h2>
+      <div id="threadsList"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>© <span id="year"></span> <span data-site-title>Portal</span></div>
+      <div class="muted">Built for travelers & locals</div>
+    </div>
+  </footer>
+
+  <script src="assets/app.js?v=24.0"></script>
+  <script type="module" src="assets/auth-nav.mjs?v=24.0"></script>
+  <script type="module">
+    import { isConfigured, getPublicProfile, listApprovedPostsByAuthor, listApprovedBusinessesByOwner, listApprovedThreadsByAuthor } from "./assets/community.mjs?v=24.0";
+
+    const qs = new URLSearchParams(location.search);
+    const id = qs.get('id');
+
+    const nameEl = document.getElementById('memberName');
+    const metaEl = document.getElementById('memberMeta');
+    const noticeEl = document.getElementById('memberNotice');
+    const postsEl = document.getElementById('postsList');
+    const bizEl = document.getElementById('bizList');
+    const threadsEl = document.getElementById('threadsList');
+
+    const esc = (s)=>String(s??'').replace(/[&<>\"']/g, (c)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+
+    function cardRow({ title, href, meta, desc, cover }){
+      const safeTitle = esc(title);
+      const safeMeta = meta ? esc(meta) : '';
+      const safeDesc = desc ? esc(desc) : '';
+      const bg = cover ? `style="background-image:url('${esc(cover)}')"` : '';
+
+      return `
+        <article class="feed-card" style="margin:10px 0">
+          <div class="feed-cover" ${bg}></div>
+          <div>
+            <h3 class="feed-title"><a class="u-link" href="${href}">${safeTitle}</a></h3>
+            ${safeMeta ? `<div class="feed-meta">${safeMeta}</div>` : ''}
+            ${safeDesc ? `<p class="feed-desc">${safeDesc}</p>` : ''}
+          </div>
+        </article>
+      `;
+    }
+
+    async function load(){
+      if(!id){
+        nameEl.textContent = 'Member not found';
+        metaEl.textContent = '';
+        noticeEl.innerHTML = `<div class="notice bad">Missing member id in URL.</div>`;
+        return;
+      }
+
+      if(!isConfigured()){
+        noticeEl.innerHTML = `<div class="notice warn"><strong>Supabase is not configured.</strong> Connect it to enable member profiles. See <span class="kbd">CONTENT_GUIDE.md</span>.</div>`;
+        return;
+      }
+
+      const p = await getPublicProfile(id);
+      if(!p || p.status !== 'active'){
+        nameEl.textContent = 'Member not found';
+        metaEl.textContent = '';
+        noticeEl.innerHTML = `<div class="notice warn">This member profile is not public (or not approved yet).</div>`;
+        return;
+      }
+
+      nameEl.textContent = p.display_name || 'Member';
+      const joined = p.created_at ? new Date(p.created_at).toLocaleDateString() : '';
+      metaEl.textContent = joined ? `Joined ${joined}` : 'Profile';
+
+      // Posts
+      const posts = await listApprovedPostsByAuthor(id, 50);
+      postsEl.innerHTML = posts.length
+        ? posts.map(r=>cardRow({
+            title: r.title,
+            href: `community-post.html?id=${encodeURIComponent(r.id)}`,
+            meta: `${r.post_type || 'post'} • ${new Date(r.created_at).toLocaleDateString()}`,
+            cover: r.cover_url
+          })).join('')
+        : `<div class="muted">No public posts yet.</div>`;
+
+      // Businesses
+      const biz = await listApprovedBusinessesByOwner(id, 50);
+      bizEl.innerHTML = biz.length
+        ? biz.map(r=>cardRow({
+            title: r.name,
+            href: `business.html?id=${encodeURIComponent(r.id)}`,
+            meta: `${r.category || 'business'} • ${new Date(r.created_at).toLocaleDateString()}`,
+            desc: (r.description_md || '').replace(/\s+/g,' ').slice(0,140) + ((r.description_md||'').length>140?'…':''),
+            cover: r.cover_url
+          })).join('')
+        : `<div class="muted">No public businesses yet.</div>`;
+
+      // Threads
+      const threads = await listApprovedThreadsByAuthor(id, 50);
+      threadsEl.innerHTML = threads.length
+        ? threads.map(r=>cardRow({
+            title: r.title,
+            href: `forum-thread.html?id=${encodeURIComponent(r.id)}`,
+            meta: `${(r.forum_categories?.title || 'Forum')} • ${new Date(r.created_at).toLocaleDateString()}`
+          })).join('')
+        : `<div class="muted">No public forum topics yet.</div>`;
+
+      noticeEl.innerHTML = '';
+    }
+
+    load().catch((e)=>{
+      noticeEl.innerHTML = `<div class="notice bad">${esc(e?.message || 'Could not load member.')}</div>`;
+    });
+  </script>
+</body>
+</html>

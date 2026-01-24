@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Forum — Events San Cristobal</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+  <link rel="stylesheet" href="assets/style.css?v=24.0" />
+  <meta name="description" content="Forum category." />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html" aria-label="Home">
+        <span class="brand-title" data-site-title>Events San Cristobal</span>
+        <span class="brand-sub" data-site-sub>Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ.</span>
+      </a>
+      <div class="header-actions">
+        <button class="icon-btn" id="searchBtn" aria-label="Search" aria-expanded="false" aria-controls="searchPanel">🔎</button>
+        <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="siteNav">☰</button>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="search-panel" id="searchPanel" hidden>
+        <form class="search-form" action="search.html" method="get">
+          <input class="search-input" id="headerSearchInput" type="search" name="q" placeholder="Search the portal…" autocomplete="off" />
+          <button class="btn" type="submit">Search</button>
+        </form>
+        <div class="suggestions" id="headerSuggestions" hidden></div>
+      </div>
+
+      <nav class="nav" id="siteNav" hidden>
+        <a href="index.html">Home</a>
+        <a href="articles.html">Life</a>
+        <a href="nature.html">Nature</a>
+        <a href="events.html">Events</a>
+        <a href="hotels.html">Hotels</a>
+        <a href="restaurants.html">Food</a>
+        <a href="music.html">Music</a>
+        <a href="faq.html">FAQ</a>
+        <a href="submit.html">Submit</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero hero-simple">
+      <h1 class="h1" id="catTitle">Forum</h1>
+      <p class="lead" id="catDesc">Loading…</p>
+      <div class="hero-actions">
+        <a class="btn ghost" href="forum.html">All categories</a>
+        <a class="btn" id="startTopic" href="submit-thread.html">Start a topic</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="filters">
+        <input class="input" id="q" type="search" placeholder="Search in this category…" />
+        <button class="btn" id="searchBtnLocal">Search</button>
+      </div>
+
+      <div id="threads" class="stack" style="margin-top:12px;"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>© <span id="year"></span> <span data-site-title>Portal</span></div>
+      <div class="muted">Built for travelers & locals</div>
+    </div>
+  </footer>
+
+  <script src="assets/app.js?v=24.0"></script>
+  <script type="module" src="assets/auth-nav.mjs?v=24.0"></script>
+  <script type="module">
+    import {
+      isConfigured,
+      getForumCategoryBySlug,
+      listForumThreads
+    } from "./assets/community.mjs?v=24.0";
+
+    const params = new URLSearchParams(location.search);
+    const slug = params.get('slug') || '';
+
+    const titleEl = document.getElementById('catTitle');
+    const descEl = document.getElementById('catDesc');
+    const threadsEl = document.getElementById('threads');
+    const startTopic = document.getElementById('startTopic');
+    const qEl = document.getElementById('q');
+
+    const esc = (s)=>String(s??'').replace(/[&<>'"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+
+    function rowThread(t){
+      const cat = t.forum_categories?.title || '';
+      const author = t.profiles?.display_name || 'Someone';
+      const dt = new Date(t.created_at).toLocaleString();
+      return `
+        <div class="card" style="padding:14px;">
+          <a class="link" href="forum-thread.html?id=${encodeURIComponent(t.id)}" style="font-weight:800; font-size:16px; display:inline-block;">${esc(t.title)}</a>
+          <div class="muted small" style="margin-top:6px;">${esc(cat)} • ${esc(author)} • ${esc(dt)}</div>
+        </div>
+      `;
+    }
+
+    async function load(){
+      if(!isConfigured()){
+        descEl.textContent = 'Supabase is not configured yet. Open Account page after you set assets/supabase-config.js.';
+        threadsEl.innerHTML = `<div class="card" style="padding:14px;">Configure Supabase first.</div>`;
+        return;
+      }
+
+      const cat = await getForumCategoryBySlug(slug).catch(()=>null);
+      if(!cat){
+        titleEl.textContent = 'Forum';
+        descEl.textContent = 'Category not found.';
+        threadsEl.innerHTML = `<div class="card" style="padding:14px;">Try going back to <a class="link" href="forum.html">Forum</a>.</div>`;
+        return;
+      }
+
+      titleEl.textContent = cat.title;
+      descEl.textContent = cat.description || 'Discussions and tips.';
+      startTopic.href = `submit-thread.html?slug=${encodeURIComponent(cat.slug)}`;
+
+      const q = (qEl.value||'').trim();
+      const threads = await listForumThreads(cat.id, { q, limit: 60 }).catch(()=>[]);
+
+      if(!threads.length){
+        threadsEl.innerHTML = `<div class="card" style="padding:14px;">No topics yet. Be the first 😄</div>`;
+        return;
+      }
+      threadsEl.innerHTML = threads.map(rowThread).join('');
+    }
+
+    document.getElementById('searchBtnLocal')?.addEventListener('click', load);
+    qEl?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); load(); }});
+
+    load();
+  </script>
+</body>
+</html>

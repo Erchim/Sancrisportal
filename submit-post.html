@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Submit a post — Events San Cristobal</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+  <link rel="stylesheet" href="assets/style.css?v=24.0" />
+  <meta name="description" content="Submit a community post." />
+</head>
+<body class="page">
+  <header class="topbar">
+    <div class="brand">
+      <a class="brand-link" href="index.html" aria-label="Home">
+        <span class="brand-name">Events San Cristobal</span>
+      </a>
+      <span class="brand-tag">Submit</span>
+    </div>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="Search" aria-expanded="false" aria-controls="searchPanel">🔎</button>
+      <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="siteNav">☰</button>
+    </div>
+
+    <nav class="nav-panel" id="siteNav" hidden>
+      <a href="search.html" data-action="open-search">Search</a>
+      <a href="index.html">Home</a>
+      <a href="articles.html">Life</a>
+      <a href="nature.html">Nature</a>
+      <a href="events.html">Events</a>
+      <a href="hotels.html">Hotels</a>
+      <a href="restaurants.html">Food</a>
+      <a href="music.html">Music</a>
+      <a href="faq.html">FAQ</a>
+      <a href="community.html">Community</a>
+      <a href="forum.html">Forum</a>
+      <a href="businesses.html">Businesses</a>
+      <a href="submit.html">Submit</a>
+    </nav>
+
+    <div class="search-panel" id="searchPanel" hidden>
+      <form class="search-form" action="search.html" method="get">
+        <input class="search-input" id="headerSearchInput" type="search" name="q" placeholder="Search the portal…" autocomplete="off" />
+        <button class="btn" type="submit">Search</button>
+      </form>
+      <div class="suggestions" id="headerSuggestions" hidden></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero hero-simple">
+      <h1 class="h1">Submit a post</h1>
+      <p class="lead">Write a story, a guide, or a business post. Everything is reviewed before it goes public.</p>
+    </section>
+
+    <section class="section">
+      <div id="submitGate" class="card" style="padding:16px;"></div>
+
+      <form id="postForm" class="card" style="padding:16px; margin-top:14px; display:none;">
+        <div class="grid2">
+          <div>
+            <label class="label">Type</label>
+            <select id="ptype" class="input">
+              <option value="story">Story</option>
+              <option value="guide">Guide</option>
+              <option value="business">Business</option>
+              <option value="artist">Artist</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Language</label>
+            <select id="lang" class="input">
+              <option value="en">English</option>
+              <option value="es">Español</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label class="label">Title</label>
+          <input id="title" class="input" type="text" placeholder="Example: My coffee journey in Chiapas" required />
+        </div>
+
+        <div class="grid2" style="margin-top:12px;">
+          <div>
+            <label class="label">Cover image (upload)</label>
+            <input id="coverFile" class="input" type="file" accept="image/*" />
+            <div class="muted small" style="margin-top:6px;">Optional. If you upload, it will be stored in Supabase Storage.</div>
+          </div>
+          <div>
+            <label class="label">Cover image URL (optional)</label>
+            <input id="coverUrl" class="input" type="url" placeholder="https://…" />
+            <div class="muted small" style="margin-top:6px;">You can either upload OR paste a URL.</div>
+          </div>
+        </div>
+
+        
+        <div class="card soft" id="metaCard" style="margin-top:12px; padding:14px;">
+          <div class="info-title" style="margin:0;">Extra details (optional)</div>
+          <div class="muted small">Add practical info (location, hours, links). It improves search and makes posts more useful.</div>
+          <div id="metaGrid" class="meta-form-grid" style="margin-top:10px;"></div>
+        </div>
+
+<div style="margin-top:12px;">
+          <label class="label">Content (Markdown)</label>
+          <textarea id="body" class="input" rows="12" placeholder="# Heading\nWrite your post…" required></textarea>
+          <div class="muted small" style="margin-top:6px;">Tip: use Markdown headings (#), lists (-), and links [text](url).</div>
+        </div>
+
+        <div class="filters" style="margin-top:14px; gap:10px;">
+          <button class="btn" type="submit" id="publishBtn">Send for review</button>
+          <a class="btn ghost" href="community.html">Back to Community</a>
+        </div>
+
+        <div class="muted small" id="submitMsg" style="margin-top:10px;"></div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>© <span id="year"></span> <span data-site-title>Portal</span></div>
+      <div class="muted">Built for travelers & locals</div>
+    </div>
+  </footer>
+
+  <script src="assets/app.js?v=24.0"></script>
+  <script type="module" src="assets/auth-nav.mjs?v=24.0"></script>
+  <script type="module">
+    import { isConfigured, getUser, getMyProfile, uploadMediaImage, createCommunityPost } from "./assets/community.mjs?v=24.0";
+
+    const gate = document.getElementById('submitGate');
+    const form = document.getElementById('postForm');
+    const msg = document.getElementById('submitMsg');
+
+    const ptype = document.getElementById('ptype');
+    const lang = document.getElementById('lang');
+    const title = document.getElementById('title');
+    const body = document.getElementById('body');
+    const coverFile = document.getElementById('coverFile');
+    const coverUrl = document.getElementById('coverUrl');
+    const publishBtn = document.getElementById('publishBtn');
+    const metaGrid = document.getElementById('metaGrid');
+    const metaCard = document.getElementById('metaCard');
+
+    const esc = (s)=>String(s??'').replace(/[&<>'"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+
+    const TEMPLATES = {
+      story: [
+        { key: "tags", label: "Tags", placeholder: "coffee, culture, rain, live music" },
+        { key: "neighborhood", label: "Area / neighborhood", placeholder: "Centro, Guadalupe, San Ramón…" },
+      ],
+      guide: [
+        { key: "tags", label: "Tags", placeholder: "transport, safety, budget, tips" },
+        { key: "area", label: "Area", placeholder: "San Cristóbal / Chiapas" },
+      ],
+      business: [
+        { key: "category", label: "Category", placeholder: "Café, hostel, co-work, tour agency…" },
+        { key: "address", label: "Address", placeholder: "Street + number (or 'near…')" },
+        { key: "hours", label: "Hours", placeholder: "Mon–Sat 9:00–18:00" },
+        { key: "price_range", label: "Price range", placeholder: "$ / $$ / $$$ or 'from 80 MXN'" },
+        { key: "whatsapp", label: "WhatsApp", placeholder: "+52 1 999 123 4567" },
+        { key: "instagram", label: "Instagram", placeholder: "@yourhandle" },
+        { key: "website", label: "Website", placeholder: "https://…" },
+        { key: "map_url", label: "Google Maps link", placeholder: "https://maps.app.goo.gl/…" },
+      ],
+      artist: [
+        { key: "category", label: "Type", placeholder: "Band, DJ, painter, dancer…" },
+        { key: "tags", label: "Tags", placeholder: "jazz, cumbia, reggae, art, open mic" },
+        { key: "instagram", label: "Instagram", placeholder: "@yourhandle" },
+        { key: "website", label: "Link (Spotify/YouTube/Portfolio)", placeholder: "https://…" },
+        { key: "whatsapp", label: "WhatsApp", placeholder: "+52…" },
+      ],
+      photographer: [
+        { key: "tags", label: "Tags", placeholder: "portraits, weddings, street, landscapes" },
+        { key: "price_range", label: "Rates", placeholder: "From 800 MXN / session" },
+        { key: "instagram", label: "Instagram", placeholder: "@yourhandle" },
+        { key: "website", label: "Portfolio link", placeholder: "https://…" },
+        { key: "whatsapp", label: "WhatsApp", placeholder: "+52…" },
+      ],
+      workshop: [
+        { key: "category", label: "Workshop type", placeholder: "Yoga, cacao, ceramics, language…" },
+        { key: "date", label: "Date", placeholder: "2026-02-10" },
+        { key: "time", label: "Time", placeholder: "18:00" },
+        { key: "location", label: "Location", placeholder: "Studio name / address" },
+        { key: "price", label: "Price", placeholder: "Donation / 250 MXN" },
+        { key: "booking_url", label: "Booking link", placeholder: "https://…" },
+        { key: "whatsapp", label: "WhatsApp", placeholder: "+52…" },
+        { key: "instagram", label: "Instagram", placeholder: "@yourhandle" },
+      ],
+    };
+
+    function fieldHTML(f){
+      return `<div class="mf">
+        <label class="label small">${esc(f.label)}</label>
+        <input class="input" data-key="${esc(f.key)}" placeholder="${esc(f.placeholder || '')}" />
+      </div>`;
+    }
+
+    function renderMetaFields(){
+      if(!metaGrid || !metaCard) return;
+      const type = (ptype.value || 'story').trim();
+      const fields = TEMPLATES[type] || TEMPLATES.story;
+      metaGrid.innerHTML = fields.map(fieldHTML).join('');
+      metaCard.style.display = fields.length ? '' : 'none';
+    }
+
+    function collectMeta(){
+      const meta = {};
+      if(!metaGrid) return meta;
+      metaGrid.querySelectorAll('[data-key]').forEach((el)=>{
+        const k = el.getAttribute('data-key');
+        const v = (el.value || '').trim();
+        if(!v) return;
+        if(k === 'tags'){
+          meta.tags = v.split(',').map(s=>s.trim()).filter(Boolean);
+        }else{
+          meta[k] = v;
+        }
+      });
+      return meta;
+    }
+
+    ptype?.addEventListener('change', renderMetaFields);
+    renderMetaFields();
+
+
+    function showGate(html){ gate.innerHTML = html; }
+
+    async function init(){
+      if(!isConfigured()){
+        showGate(`<div class="notice"><div class="notice-title">Community is not connected yet</div><div class="notice-body">Edit <span class="kbd">assets/supabase-config.js</span> and add your Supabase Project URL + anon key.</div></div>`);
+        return;
+      }
+      const user = await getUser().catch(()=>null);
+      if(!user){
+        showGate(`<h2 style="margin:0 0 8px 0;">Sign in required</h2><p class="muted">Please sign in to submit a post.</p><div class="filters"><a class="btn" href="account.html">Go to Account</a></div>`);
+        return;
+      }
+      const prof = await getMyProfile().catch(()=>null);
+      if(!prof){
+        showGate(`<h2 style="margin:0 0 8px 0;">Profile not ready</h2><p class="muted">Open Account page once and fill your details.</p><div class="filters"><a class="btn" href="account.html">Go to Account</a></div>`);
+        return;
+      }
+      if(prof.status !== 'active'){
+        showGate(`<h2 style="margin:0 0 8px 0;">Pending approval</h2><p class="muted">Your account is pending. Add name + phone in Account and wait for approval (1–3 days).</p><div class="filters"><a class="btn" href="account.html">Go to Account</a></div>`);
+        return;
+      }
+      showGate(`<div class="notice"><div class="notice-title">Ready</div><div class="notice-body">Your post will be created as <b>pending</b> and will appear after approval.</div></div>`);
+      form.style.display = '';
+    }
+
+    form?.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      msg.textContent = '';
+      publishBtn.disabled = true;
+      try{
+        let cover = (coverUrl.value||'').trim();
+        const file = coverFile.files && coverFile.files[0];
+        if(file){
+          msg.textContent = 'Uploading cover…';
+          cover = await uploadMediaImage(file);
+        }
+        msg.textContent = 'Submitting…';
+        const row = await createCommunityPost({
+          title: (title.value||'').trim(),
+          content_md: (body.value||'').trim(),
+          cover_url: cover,
+          post_type: (ptype.value||'story').trim(),
+          lang: (lang.value||'en').trim(),
+          meta: collectMeta()
+        });
+        msg.textContent = 'Sent for review! It will appear in Community after approval.';
+        form.reset();
+      }catch(err){
+        msg.textContent = err?.message || 'Could not submit.';
+      }finally{
+        publishBtn.disabled = false;
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>

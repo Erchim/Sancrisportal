@@ -267,7 +267,7 @@ textarea{min-height:120px;resize:vertical}
   padding:34px 14px 14px;
   background:
     linear-gradient(180deg, rgba(11,12,16,0) 0%, rgba(11,12,16,.55) 35%, rgba(11,12,16,.94) 100%),
-    radial-gradient(900px 220px at 30% 0%, color-mix(in srgb, var(--accent, rgba(255,255,255,.25)) 35%, transparent), transparent 65%);
+    radial-gradient(900px 220px at 30% 0%, rgba(255,255,255,.10), transparent 65%);
   border-top:1px solid rgba(255,255,255,.10);
   backdrop-filter:blur(10px);
 }
@@ -286,7 +286,7 @@ textarea{min-height:120px;resize:vertical}
   left:0; right:0; bottom:0;
   height:4px;
   background:linear-gradient(90deg,
-    color-mix(in srgb, var(--accent, rgba(255,255,255,.35)) 90%, transparent),
+    rgba(255,255,255,.12),
     transparent 65%);
   opacity:.9;
 }
@@ -296,7 +296,7 @@ textarea{min-height:120px;resize:vertical}
   margin-top:8px;
   padding:7px 10px;
   border-radius:12px;
-  background:color-mix(in srgb, var(--accent, rgba(255,255,255,.18)) 20%, rgba(255,255,255,.05));
+  background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.14);
   color:rgba(232,236,255,.92);
 }
@@ -506,10 +506,195 @@ textarea{min-height:120px;resize:vertical}
 .mini-card[data-kind="Article"]{--accent:#8ecae6}
 .mini-card[data-kind="Place"]{--accent:#80ed99}
 .mini-card[data-kind="FAQ"]{--accent:#ffd166}
-.mini-card::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(700px 260px at 30% 0%, color-mix(in srgb, var(--accent, rgba(255,255,255,.25)) 35%, transparent), transparent 60%)}
+.mini-card::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(700px 260px at 30% 0%, rgba(255,255,255,.10), transparent 60%)}
 .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.22);font-weight:800;font-size:.82rem}
 @media(max-width:620px){
   .mini-card{min-width:78vw}
   .row-head{align-items:flex-start}
 }
 
+
+/* ===== v17: community (Supabase) ===== */
+.divider{height:1px;background:rgba(255,255,255,.08);margin:14px 0}
+
+.community{padding:14px 16px}
+.community .k{font-weight:900;margin:0 0 8px 0}
+.community .sub{color:var(--muted);margin:0 0 10px 0}
+.community .row2{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}
+@media(max-width:720px){.community .row2{grid-template-columns:1fr}}
+.community .comment{padding:12px 12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);border-radius:16px;margin:10px 0}
+.community .comment .meta{font-size:.88rem;color:var(--muted)}
+.community .stars{display:inline-flex;gap:6px;align-items:center}
+.community .star{width:22px;height:22px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);cursor:pointer;display:grid;place-items:center;color:rgba(255,255,255,.88)}
+.community .star.active{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22)}
+.community .mini{font-size:.88rem;color:var(--muted)}
+
+.feed{padding:12px}
+.feed .feed-card{display:grid;grid-template-columns:220px 1fr;gap:14px;padding:14px;margin:10px 6px;border-radius:18px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);overflow:hidden}
+@media(max-width:820px){.feed .feed-card{grid-template-columns:1fr}}
+.feed .feed-cover{width:220px;height:140px;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:#0b0c10 center/cover no-repeat;box-shadow:0 12px 26px rgba(0,0,0,.30)}
+@media(max-width:820px){.feed .feed-cover{width:100%}}
+.feed .feed-title{font-weight:900;margin:0 0 6px 0}
+.feed .feed-meta{color:var(--muted);font-size:.92rem;display:flex;gap:10px;flex-wrap:wrap}
+.feed .feed-desc{color:var(--muted);margin:8px 0 0 0}
+
+.notice{padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06)}
+.notice.good{border-color:rgba(120,255,170,.22);background:rgba(120,255,170,.08)}
+.notice.warn{border-color:rgba(255,200,90,.22);background:rgba(255,200,90,.08)}
+.notice.bad{border-color:rgba(255,120,150,.22);background:rgba(255,120,150,.08)}
+
+/* v19 helpers */
+.link-btn{background:none;border:0;padding:0;color:inherit;opacity:.85;text-decoration:underline;cursor:pointer;font:inherit}
+.link-btn:hover{opacity:1}
+.comment-actions{margin-top:6px}
+.u-link{text-decoration:underline;text-decoration-color:rgba(255,255,255,.22);text-underline-offset:3px}
+.u-link:hover{text-decoration-color:rgba(255,255,255,.60)}
+
+/* v20 modal */
+body.modal-open{overflow:hidden}
+.modal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);display:grid;place-items:center;padding:18px}
+.modal{width:min(560px, 92vw);border-radius:22px;border:1px solid rgba(255,255,255,.14);background:rgba(16,18,24,.92);box-shadow:0 22px 70px rgba(0,0,0,.55);overflow:hidden}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.10)}
+.modal-title{font-weight:900;font-size:1.05rem}
+.icon-btn{width:36px;height:36px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);cursor:pointer;display:grid;place-items:center}
+.icon-btn:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.20)}
+.modal-body{padding:14px 16px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;padding:14px 16px;border-top:1px solid rgba(255,255,255,.10)}
+.label{display:block;font-weight:900;font-size:.9rem;margin:10px 0 6px}
+
+
+/* =========================================================
+   v24 "City vibe" theme — warm Chiapas palette + textile pattern
+   (Safe overrides appended to keep legacy rules stable)
+   ========================================================= */
+:root{
+  --bg:#1b0f0a;           /* cacao */
+  --bg2:#26140d;          /* coffee */
+  --paper:rgba(255,248,240,.08);
+  --paper2:rgba(255,248,240,.05);
+  --line:rgba(255,231,214,.10);
+  --text:#fff5ea;
+  --muted:rgba(255,245,234,.72);
+  --shadow:0 14px 40px rgba(0,0,0,.38);
+  --radius:18px;
+  --accent:#2bbf9f;       /* jade */
+  --accent2:#f2b84b;      /* marigold */
+  --accent3:#d96c49;      /* terracotta */
+  --accent4:#5b6dd6;      /* indigo */
+}
+
+/* Accent per content type (used by details + chips) */
+html[data-accent="story"]{--accent:var(--accent2)}
+html[data-accent="guide"]{--accent:var(--accent)}
+html[data-accent="business"]{--accent:var(--accent3)}
+html[data-accent="artist"]{--accent:var(--accent4)}
+html[data-accent="photographer"]{--accent:var(--accent)}
+html[data-accent="workshop"]{--accent:var(--accent2)}
+
+body{background:linear-gradient(180deg,var(--bg),var(--bg2)) !important;}
+body::before{
+  opacity:.62;
+  filter:saturate(1.05) contrast(1.02) brightness(.72);
+}
+body::after{
+  background:
+    url("patterns/weave.svg") center/260px repeat,
+    radial-gradient(1200px 600px at 15% 8%, rgba(242,184,75,.13), transparent 60%),
+    radial-gradient(900px 500px at 85% 18%, rgba(43,191,159,.10), transparent 58%),
+    linear-gradient(180deg, rgba(27,15,10,.88), rgba(27,15,10,.93)) !important;
+}
+
+.card{
+  background:var(--paper) !important;
+  border:1px solid var(--line) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.card.soft{background:var(--paper2) !important;}
+.notice{background:var(--paper) !important;border:1px solid var(--line) !important;}
+.btn{border-color:rgba(255,231,214,.16) !important;}
+.btn:not(.ghost){background:linear-gradient(180deg, rgba(255,248,240,.12), rgba(255,248,240,.06)) !important;}
+.btn.primary{background:linear-gradient(180deg, rgba(43,191,159,.16), rgba(255,255,255,.05)) !important;border-color: rgba(43,191,159,.28) !important;}
+.btn.primary:hover{transform:translateY(-1px);}
+
+.muted{color:var(--muted) !important;}
+
+.brand-name{letter-spacing:.2px;}
+.brand-tag{opacity:.85;}
+
+.icon-btn{
+  background:rgba(255,248,240,.07) !important;
+  border:1px solid rgba(255,231,214,.14) !important;
+}
+.nav-panel{
+  background:rgba(27,15,10,.92) !important;
+  border:1px solid rgba(255,231,214,.14) !important;
+}
+.search-panel{
+  background:rgba(27,15,10,.92) !important;
+  border:1px solid rgba(255,231,214,.14) !important;
+}
+
+/* Post layout + details */
+.post-layout{
+  display:grid;
+  grid-template-columns: 1.65fr .95fr;
+  gap:18px;
+  align-items:start;
+}
+@media (max-width: 880px){
+  .post-layout{grid-template-columns:1fr;}
+}
+.info-card{
+  position:sticky;
+  top:92px;
+  padding:14px;
+  border-left: 3px solid var(--accent) !important;
+}
+@media (max-width: 880px){
+  .info-card{position:relative; top:auto;}
+}
+.info-title{margin:0 0 10px 0;font-size:14px;letter-spacing:.25px;text-transform:uppercase;color:var(--muted);}
+.info-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 12px 0;}
+.action-pill{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:999px;
+  background:rgba(255,248,240,.08);
+  border:1px solid rgba(255,231,214,.14);
+  color:var(--text);
+  font-size:13px;
+}
+.action-pill:hover{border-color:var(--accent);transform:translateY(-1px);}
+.meta-grid{display:grid;gap:10px;margin-top:6px;}
+.meta-row{display:grid;grid-template-columns: 16px 1fr;gap:10px;align-items:flex-start;}
+.meta-ico{width:16px;height:16px;opacity:.9;margin-top:2px;fill:var(--accent);}
+.meta-k{font-size:12px;color:var(--muted);line-height:1.2}
+.meta-v{font-size:14px;line-height:1.25}
+.meta-v a{color:var(--accent);text-decoration:underline;text-underline-offset:3px;}
+.meta-v a:hover{opacity:.92}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 10px;border-radius:999px;
+  background:rgba(255,248,240,.07);
+  border:1px solid rgba(255,231,214,.12);
+  font-size:12px;color:var(--text);
+}
+.chip strong{color:var(--accent);font-weight:700}
+.small-note{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.35}
+
+/* Make link affordance more obvious */
+.u-link{text-decoration:underline;text-underline-offset:3px;}
+.u-link:hover{opacity:.92}
+
+/* v24 meta form */
+.meta-form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+@media (max-width: 720px){
+  .meta-form-grid{grid-template-columns:1fr;}
+}
+.mf .label.small{font-size:12px; opacity:.9;}

@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Admin — Events San Cristobal</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/style.css?v=24.0" />
+  <meta name="robots" content="noindex" />
+</head>
+<body class="page">
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <span class="brand-title">Events San Cristobal</span>
+      <span class="brand-tag">Admin</span>
+    </a>
+
+    <div class="topbar-actions">
+      <button class="icon-btn" id="searchBtn" aria-label="Search" aria-expanded="false">🔎</button>
+      <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">☰</button>
+    </div>
+
+    <div class="search-panel" id="searchPanel" hidden>
+      <form class="search-form" action="search.html" method="get">
+        <input class="search-input" type="search" name="q" placeholder="Search…" autocomplete="off" />
+        <button class="btn" type="submit">Search</button>
+      </form>
+    </div>
+
+    <nav class="nav-panel" id="siteNav" hidden>
+      <a href="search.html" data-action="open-search">Search</a>
+      <a href="index.html">Home</a>
+      <a href="articles.html">Life</a>
+      <a href="nature.html">Nature</a>
+      <a href="events.html">Events</a>
+      <a href="hotels.html">Hotels</a>
+      <a href="restaurants.html">Food</a>
+      <a href="music.html">Music</a>
+      <a href="faq.html">FAQ</a>
+      <a href="community.html">Community</a>
+      <a href="forum.html">Forum</a>
+      <a href="businesses.html">Businesses</a>
+      <a href="submit.html">Submit</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Moderation</h1>
+      <p class="lead">Approve or reject submissions. Everything here is invisible to the public until approved.</p>
+      <p class="meta" id="statusMsg"></p>
+      <div class="filters">
+        <button class="btn" id="refreshBtn">Refresh</button>
+        <a class="btn ghost" href="account.html">Account</a>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="card">
+        <h2>Pending users</h2>
+        <div class="list" id="pendingUsers"></div>
+      </div>
+
+      <div class="card">
+        <h2>Pending posts</h2>
+        <div class="list" id="pendingPosts"></div>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="card">
+        <h2>Pending comments</h2>
+        <div class="list" id="pendingComments"></div>
+      </div>
+
+      <div class="card">
+        <h2>Pending business profiles</h2>
+        <div class="list" id="pendingBusinesses"></div>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="card">
+        <h2>Pending forum topics</h2>
+        <div class="list" id="pendingThreads"></div>
+      </div>
+
+      <div class="card">
+        <h2>Pending forum replies</h2>
+        <div class="list" id="pendingReplies"></div>
+      </div>
+    </section>
+
+
+<section class="grid2">
+  <div class="card">
+    <h2>Pending ratings</h2>
+    <div class="list" id="pendingRatings"></div>
+  </div>
+  <div class="card">
+    <h2>Reports</h2>
+    <div class="list" id="pendingReports"></div>
+  </div>
+</section>
+  </main>
+
+  <footer class="wrap footer">
+    <p class="meta">Tip: you can promote someone to Staff/Business in Supabase table <b>profiles</b> by changing the role.</p>
+  </footer>
+
+  <script src="assets/app.js?v=24.0"></script>
+  <script type="module" src="assets/auth-nav.mjs?v=24.0"></script>
+  <script type="module">
+    import {
+      isConfigured,
+      getUser,
+      getMyProfile,
+      adminListPending,
+      adminApproveProfile, adminRejectProfile,
+      adminApprovePost, adminRejectPost,
+      adminApproveComment, adminRejectComment,
+      adminApproveRating, adminRejectRating,
+      adminApproveBusiness, adminRejectBusiness,
+      adminApproveForumThread, adminRejectForumThread,
+      adminApproveForumReply, adminRejectForumReply,
+      adminApproveReport, adminRejectReport
+    } from "./assets/community.mjs?v=24.0";
+
+    const msg = document.getElementById("statusMsg");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    const elUsers = document.getElementById("pendingUsers");
+    const elPosts = document.getElementById("pendingPosts");
+    const elComments = document.getElementById("pendingComments");
+    const elBusinesses = document.getElementById("pendingBusinesses");
+    const elThreads = document.getElementById("pendingThreads");
+    const elReplies = document.getElementById("pendingReplies");
+    const elRatings = document.getElementById("pendingRatings");
+    const elReports = document.getElementById("pendingReports");
+
+    function setMsg(t){ msg.textContent = t || ""; }
+    function esc(s){ return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+
+    function renderRow({ title, meta, body, onApprove, onReject }) {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <div class="row-main">
+          <div class="row-title">${esc(title)}</div>
+          ${meta ? `<div class="row-meta">${esc(meta)}</div>` : ""}
+          ${body ? `<div class="row-body">${body}</div>` : ""}
+        </div>
+        <div class="row-actions">
+          <button class="btn" data-act="approve">Approve</button>
+          <button class="btn ghost" data-act="reject">Reject</button>
+        </div>
+      `;
+      row.querySelector('[data-act="approve"]').addEventListener("click", onApprove);
+      row.querySelector('[data-act="reject"]').addEventListener("click", onReject);
+      return row;
+    }
+
+    function clearAll() {
+      for (const el of [elUsers, elPosts, elComments, elBusinesses, elThreads, elReplies]) {
+        el.innerHTML = "";
+      }
+    }
+
+    async function refresh() {
+      try {
+        setMsg("");
+        if (!isConfigured()) {
+          setMsg("Supabase is not configured yet. Open assets/supabase-config.js");
+          return;
+        }
+
+        const u = await getUser();
+        if (!u) {
+          setMsg("Sign in first: Account → Magic link.");
+          return;
+        }
+
+        const profile = await getMyProfile();
+        if (!profile) {
+          setMsg("Profile missing. Open Account and save profile info once.");
+          return;
+        }
+
+        if (!["owner","staff"].includes(profile.role)) {
+          setMsg("You are not Staff/Owner. Change your role in Supabase table profiles.");
+          return;
+        }
+
+        clearAll();
+        setMsg("Loading…");
+        const pending = await adminListPending();
+
+        // Users
+        if (!pending.profiles?.length) elUsers.innerHTML = `<div class="meta">No pending users.</div>`;
+        else pending.profiles.forEach((x) => {
+          elUsers.appendChild(renderRow({
+            title: x.display_name || x.email || x.id,
+            meta: `${x.email || ""} • role=${x.role} • status=${x.status}`,
+            body: x.phone ? `<div class="meta">Phone: ${esc(x.phone)}</div>` : "",
+            onApprove: async () => { await adminApproveProfile(x.id); await refresh(); },
+            onReject: async () => { await adminRejectProfile(x.id); await refresh(); }
+          }));
+        });
+
+        // Posts
+        if (!pending.posts?.length) elPosts.innerHTML = `<div class="meta">No pending posts.</div>`;
+        else pending.posts.forEach((x) => {
+          elPosts.appendChild(renderRow({
+            title: x.title || "Untitled",
+            meta: `${x.profiles?.display_name || "Unknown"} • ${new Date(x.created_at).toLocaleString()}`,
+            body: `<div class="meta">${esc((x.content_md || "").slice(0, 160))}</div>`,
+            onApprove: async () => { await adminApprovePost(x.id); await refresh(); },
+            onReject: async () => { await adminRejectPost(x.id); await refresh(); }
+          }));
+        });
+
+        // Comments
+        if (!pending.comments?.length) elComments.innerHTML = `<div class="meta">No pending comments.</div>`;
+        else pending.comments.forEach((x) => {
+          elComments.appendChild(renderRow({
+            title: `Comment on ${x.content_ref}`,
+            meta: `${x.profiles?.display_name || "Unknown"} • ${new Date(x.created_at).toLocaleString()}`,
+            body: `<div class="meta">${esc(x.body || "")}</div>`,
+            onApprove: async () => { await adminApproveComment(x.id); await refresh(); },
+            onReject: async () => { await adminRejectComment(x.id); await refresh(); }
+          }));
+        });
+
+        // Businesses
+        if (!pending.businesses?.length) elBusinesses.innerHTML = `<div class="meta">No pending business profiles.</div>`;
+        else pending.businesses.forEach((x) => {
+          elBusinesses.appendChild(renderRow({
+            title: x.name,
+            meta: `${x.category} • ${x.profiles?.display_name || "Unknown"} • ${new Date(x.created_at).toLocaleString()}`,
+            body: `<div class="meta">${esc((x.description_md || "").slice(0, 160))}</div>`,
+            onApprove: async () => { await adminApproveBusiness(x.id); await refresh(); },
+            onReject: async () => { await adminRejectBusiness(x.id); await refresh(); }
+          }));
+        });
+
+        // Forum threads
+        if (!pending.forum_threads?.length) elThreads.innerHTML = `<div class="meta">No pending topics.</div>`;
+        else pending.forum_threads.forEach((x) => {
+          elThreads.appendChild(renderRow({
+            title: x.title,
+            meta: `${x.forum_categories?.title || ""} • ${x.profiles?.display_name || "Unknown"} • ${new Date(x.created_at).toLocaleString()}`,
+            body: `<div class="meta">${esc((x.body_md || "").slice(0, 160))}</div>`,
+            onApprove: async () => { await adminApproveForumThread(x.id); await refresh(); },
+            onReject: async () => { await adminRejectForumThread(x.id); await refresh(); }
+          }));
+        });
+
+        // Forum replies
+        if (!pending.forum_replies?.length) elReplies.innerHTML = `<div class="meta">No pending replies.</div>`;
+        else pending.forum_replies.forEach((x) => {
+          elReplies.appendChild(renderRow({
+            title: `Reply in thread`,
+            meta: `${x.forum_threads?.title || ""} • ${x.profiles?.display_name || "Unknown"} • ${new Date(x.created_at).toLocaleString()}`,
+            body: `<div class="meta">${esc((x.body || "").slice(0, 200))}</div>`,
+            onApprove: async () => { await adminApproveForumReply(x.id); await refresh(); },
+            onReject: async () => { await adminRejectForumReply(x.id); await refresh(); }
+          }));
+
+
+// Ratings
+if (!pending.ratings?.length) elRatings.innerHTML = `<div class="meta">No pending ratings.</div>`;
+else pending.ratings.forEach((x) => {
+  elRatings.appendChild(renderRow({
+    title: `Rating: ${x.rating}★`,
+    meta: `${x.content_ref} • ${x.profiles?.display_name || "Unknown"} • ${new Date(x.created_at).toLocaleString()}`,
+    body: `<div class="meta">Content ref: <b>${esc(x.content_ref)}</b></div>`,
+    onApprove: async () => { await adminApproveRating(x.id); await refresh(); },
+    onReject: async () => { await adminRejectRating(x.id); await refresh(); }
+  }));
+});
+
+// Reports
+if (!pending.reports?.length) elReports.innerHTML = `<div class="meta">No new reports.</div>`;
+else pending.reports.forEach((x) => {
+  const reporter = x.profiles?.display_name || x.profiles?.email || "Unknown";
+  elReports.appendChild(renderRow({
+    title: `Report`,
+    meta: `${x.content_ref} • by ${reporter} • ${new Date(x.created_at).toLocaleString()}`,
+    body: `<div class="meta"><b>Reason:</b> ${esc(x.reason || "")}</div>` + (x.details ? `<div style="margin-top:6px;">${esc(x.details)}</div>` : ""),
+    onApprove: async () => { await adminApproveReport(x.id); await refresh(); },
+    onReject: async () => { await adminRejectReport(x.id); await refresh(); }
+  }));
+});        });
+
+        setMsg("");
+      } catch (err) {
+        setMsg(err?.message || "Could not load admin queue.");
+      }
+    }
+
+    refreshBtn?.addEventListener("click", () => refresh());
+    refresh();
+  </script>
+</body>
+</html>

@@ -7,7 +7,7 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0b0c10" />
-  <link rel="stylesheet" href="assets/style.css?v=16.0" />
+  <link rel="stylesheet" href="assets/style.css?v=24.0" />
   <meta name="description" content="Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ." />
   <meta name="robots" content="index,follow" />
 
@@ -61,6 +61,9 @@
       <p id="detailDesc" class="detail-desc"></p>
     </div>
     <div id="detailBody" class="prose-body"></div>
+
+    <div class="divider"></div>
+    <div id="communityCommentsMount" class="community"></div>
     <div class="card-foot"><a href="index.html">← Back home</a></div>
   </section>
 </main>
@@ -68,10 +71,19 @@
 <footer class="container footer">
   <div class="muted small">© <span id="year"></span> <span data-site-title>Events.SanCris</span> • <a id="igLink" class="muted" href="#" target="_blank" rel="noreferrer">Instagram</a></div>
 </footer>
-<script src="assets/app.js?v=16.0"></script>
+<script src="assets/app.js?v=24.0"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>App.initPost();</script>
+
+<script type="module" src="assets/auth-nav.mjs?v=24.0"></script>
+<script type="module">
+  import { initCommentsWidget } from "./assets/community.mjs?v=24.0";
+  const params = new URLSearchParams(location.search);
+  const slug = params.get("slug") || "welcome";
+  const mountEl = document.getElementById("communityCommentsMount");
+  if (mountEl) initCommentsWidget({ mountEl, content_ref: "legacy:post:" + slug });
+</script>
 
 </body>
 </html>

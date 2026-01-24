@@ -6,6 +6,36 @@ const esc=(s)=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":
 function setActiveNav(){const p=location.pathname.split("/").pop()||"index.html";document.querySelectorAll(".nav-panel a").forEach(a=>{if(a.getAttribute("href")===p)a.classList.add("active");});}
 function setYear(){const y=$("year");if(y)y.textContent=String(new Date().getFullYear());}
 
+function ensureNavLinks(){
+  const nav = document.getElementById("siteNav");
+  if(!nav) return;
+
+  const has = (href)=>!!nav.querySelector(`a[href="${href}"]`);
+  const mk = (href,label)=>{
+    const a=document.createElement("a");
+    a.href=href;
+    a.textContent=label;
+    return a;
+  };
+  const insertAfter = (href, label, afterHref)=>{
+    if(has(href)) return;
+    const a = mk(href,label);
+    const after = afterHref ? nav.querySelector(`a[href="${afterHref}"]`) : null;
+    if(after && after.parentNode === nav){
+      after.insertAdjacentElement("afterend", a);
+    } else {
+      nav.appendChild(a);
+    }
+  };
+
+  // Keep these links visible across all pages
+  insertAfter("community.html","Community","faq.html");
+  insertAfter("forum.html","Forum","community.html");
+  insertAfter("businesses.html","Businesses","forum.html");
+  insertAfter("submit.html","Submit","businesses.html");
+}
+
+
 
 function initMenu(){
   const btn = document.getElementById("menuBtn");
@@ -172,7 +202,7 @@ function renderResults(c,rs){c.innerHTML="";if(!rs.length){c.innerHTML=`<div cla
 for(const r of rs){const el=document.createElement("div");el.className="result";el.innerHTML=`<div class="type">${esc(r.type)}</div><div class="title"><a href="${esc(r.url)}">${esc(r.title)}</a></div><div class="snippet">${esc(r.snippet||"")}</div>`;c.appendChild(el);}}
 function bindSearch(input,btn,fn){if(!input)return;const run=()=>fn(input.value||"");input.addEventListener("input",run);
 input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();run();}});if(btn)btn.addEventListener("click",e=>{e.preventDefault();run();});}
-App.initSite=async function(){setActiveNav();setYear();initMenu();initHeaderSearch();const s=await site();applyBrand(s);const ig=$("igLink");if(ig&&s.instagram_url)ig.href=s.instagram_url;};
+App.initSite=async function(){setActiveNav();setYear();initMenu();initHeaderSearch();ensureNavLinks();const s=await site();applyBrand(s);const ig=$("igLink");if(ig&&s.instagram_url)ig.href=s.instagram_url;};
 
 function renderMiniCards(container, cards, opts={}){
   const emptyText=opts.emptyText||"Nothing here yet.";

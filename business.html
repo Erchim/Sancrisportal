@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Business — Events San Cristobal</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b0c10" />
+  <link rel="stylesheet" href="assets/style.css?v=24.0" />
+  <meta name="description" content="Local business profile." />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html" aria-label="Home">
+        <span class="brand-title" data-site-title>Events San Cristobal</span>
+        <span class="brand-sub" data-site-sub>Local portal for San Cristóbal de las Casas: events, life guides, nature trips, hotels, food, and practical FAQ.</span>
+      </a>
+      <div class="header-actions">
+        <button class="icon-btn" id="searchBtn" aria-label="Search" aria-expanded="false" aria-controls="searchPanel">🔎</button>
+        <button class="icon-btn" id="menuBtn" aria-label="Menu" aria-expanded="false" aria-controls="siteNav">☰</button>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="search-panel" id="searchPanel" hidden>
+        <form class="search-form" action="search.html" method="get">
+          <input class="search-input" id="headerSearchInput" type="search" name="q" placeholder="Search the portal…" autocomplete="off" />
+          <button class="btn" type="submit">Search</button>
+        </form>
+        <div class="suggestions" id="headerSuggestions" hidden></div>
+      </div>
+
+      <nav class="nav" id="siteNav" hidden>
+        <a href="index.html">Home</a>
+        <a href="articles.html">Life</a>
+        <a href="nature.html">Nature</a>
+        <a href="events.html">Events</a>
+        <a href="hotels.html">Hotels</a>
+        <a href="restaurants.html">Food</a>
+        <a href="music.html">Music</a>
+        <a href="faq.html">FAQ</a>
+        <a href="community.html">Community</a>
+        <a href="forum.html">Forum</a>
+        <a href="businesses.html">Businesses</a>
+        <a href="submit.html">Submit</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero hero-simple">
+      <h1 class="h1" id="title">Business</h1>
+      <p class="lead" id="meta">Loading…</p>
+      <div class="hero-actions">
+        <a class="btn ghost" href="businesses.html">Back to list</a>
+        <a class="btn" href="submit-business.html">Submit your business</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card" style="padding:16px;">
+        <div id="cover" class="cover" style="height:220px; border-radius:16px; overflow:hidden; background:#111;">
+          <img id="coverImg" alt="" style="width:100%; height:100%; object-fit:cover; display:none;" />
+        </div>
+        <div style="margin-top:14px;">
+          <div class="pill" id="category" style="display:inline-block; margin-bottom:10px;"></div>
+          <div id="desc" class="prose" style="margin-top:6px;"></div>
+
+          <div id="details" style="margin-top:14px; display:grid; gap:8px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card" style="padding:16px;">
+        <h2 style="margin:0 0 10px 0;">Comments & rating</h2>
+        <div id="comments"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>© <span id="year"></span> <span data-site-title>Portal</span></div>
+      <div class="muted">Built for travelers & locals</div>
+    </div>
+  </footer>
+
+  <script src="assets/app.js?v=24.0"></script>
+  <script type="module" src="assets/auth-nav.mjs?v=24.0"></script>
+  <script type="module">
+    import { isConfigured, getBusiness, initCommentsWidget, makeContentRef } from "./assets/community.mjs?v=24.0";
+
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+
+    const title = document.getElementById("title");
+    const meta = document.getElementById("meta");
+    const coverImg = document.getElementById("coverImg");
+    const category = document.getElementById("category");
+    const desc = document.getElementById("desc");
+    const details = document.getElementById("details");
+
+    if (!id) {
+      meta.textContent = "Missing id.";
+    } else if (!isConfigured()) {
+      meta.innerHTML = 'Supabase is not configured. Add keys in <code>assets/supabase-config.js</code>.';
+    } else {
+      (async () => {
+        const b = await getBusiness(id);
+        if (!b) {
+          meta.textContent = "Not found (or not approved yet).";
+          return;
+        }
+
+        title.textContent = b.name;
+        meta.textContent = `Added ${new Date(b.created_at).toLocaleDateString()} · by ${b?.profiles?.display_name || "community"}`;
+        category.textContent = b.category || "other";
+
+        if (b.cover_url) {
+          coverImg.src = b.cover_url;
+          coverImg.style.display = "block";
+        }
+
+        const md = b.description_md || "";
+        desc.innerHTML = window.marked ? window.marked.parse(md) : md;
+
+        const rows = [];
+        const addRow = (label, value, href=null) => {
+          if (!value) return;
+          const safe = String(value);
+          const v = href ? `<a href="${href}" target="_blank" rel="noopener">${safe}</a>` : safe;
+          rows.push(`<div class="row" style="display:flex; gap:10px; align-items:flex-start;"><div class="muted" style="min-width:90px;">${label}</div><div>${v}</div></div>`);
+        };
+
+        addRow("Address", b.address);
+        addRow("Phone", b.phone);
+        addRow("Website", b.website, b.website.startsWith("http") ? b.website : `https://${b.website}`);
+        addRow("Instagram", b.instagram, b.instagram.startsWith("http") ? b.instagram : `https://instagram.com/${b.instagram.replace(/^@/, "")}`);
+
+        if (Array.isArray(b.tags) && b.tags.length) {
+          addRow("Tags", b.tags.map(t => `<span class="chip" style="margin-right:6px;">${t}</span>`).join(""));
+        }
+
+        details.innerHTML = rows.join("") || '<div class="muted">No extra details.</div>';
+
+        // Comments + ratings
+        initCommentsWidget({
+          mount: document.getElementById("comments"),
+          content_ref: makeContentRef("business", id),
+          title: b.name
+        });
+      })().catch((e) => {
+        meta.textContent = e?.message || "Error";
+      });
+    }
+  </script>
+</body>
+</html>
