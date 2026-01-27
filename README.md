@@ -16,3 +16,7 @@ Put images in `assets/images/` and reference by path, e.g.:
 - `assets/images/my-photo.jpg`
 
 See: `CONTENT_GUIDE.md`
+
+
+## Supabase (community features)
+See `SUPABASE_SETUP.md` to connect Supabase from zero.

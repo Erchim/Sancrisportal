@@ -5,8 +5,8 @@
 //    - anon public key -> paste below
 // 3) Commit this file.
 
-export const SUPABASE_URL = "https://xnmwyknznmqfymyfxpqe.supabase.co";
-export const SUPABASE_ANON_KEY = "sb_publishable_5Go8wSh-MGRw58Kij8Aniw_9cJTnAQu";
+export const SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co";
+export const SUPABASE_ANON_KEY = "YOUR_ANON_PUBLIC_KEY";
 
 // Optional: where magic links should send users after login.
 // Leave empty to auto-detect at runtime.

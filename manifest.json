@@ -1,10 +1,10 @@
 {
-  "name": "Events.SanCristobal — City Portal",
-  "short_name": "Events.SanCris",
+  "name": "Events.SanCristobal \u2014 City Portal",
+  "short_name": "Events SanCris",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#0b0c10",
-  "theme_color": "#0b0c10",
+  "background_color": "#1b0f0a",
+  "theme_color": "#1b0f0a",
   "icons": [
     {
       "src": "assets/favicon.svg",
